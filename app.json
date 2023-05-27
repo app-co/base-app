@@ -23,6 +23,11 @@
         "backgroundColor": "#ffffff"
       }
     },
+
+    "plugins": [
+      ["expo-notifications", {"color": "#000000"}]
+    ],
+
     "web": {
       "favicon": "./assets/favicon.png"
     }
