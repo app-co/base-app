@@ -1,15 +1,104 @@
-import { StatusBar } from 'expo-status-bar';
-import { NativeBaseProvider, Box } from 'native-base';
-import { StyleSheet, Text, View } from 'react-native';
+/* eslint-disable react/style-prop-object */
+/* eslint-disable camelcase */
 
-import { Routes } from './src/routes';
+import {
+  Comfortaa_400Regular,
+  Comfortaa_500Medium,
+  Comfortaa_700Bold,
+  useFonts,
+} from '@expo-google-fonts/comfortaa';
+
+import 'intl';
+import 'intl/locale-data/jsonp/pt-BR';
+import 'react-native-gesture-handler';
+
+import { NavigationContainer } from '@react-navigation/native';
+import * as Notifications from 'expo-notifications';
+import { StatusBar } from 'expo-status-bar';
+import * as Updates from 'expo-updates';
+import {
+  Box,
+  Button as ButtonBase,
+  Center,
+  NativeBaseProvider,
+  Text,
+} from 'native-base';
+import React, { useRef } from 'react';
+import { ActivityIndicator, AppState, LogBox, Modal, View } from 'react-native';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { ThemeProvider } from 'styled-components/native';
+
+import theme from './src/global/styles/theme';
+import { AppProvider } from './src/hooks';
+import { AuthContextProvider } from './src/hooks/AuthContext';
+import { SingIn } from './src/pages/LogIn';
+import { Route } from './src/routes';
+import { update, version } from './src/utils/updates';
 
 export default function App() {
+  const appState = useRef(AppState.currentState);
+
+  const [appVisible, setAppVisible] = React.useState(appState.current);
+  const [showModalUpdate, setModalUpdates] = React.useState(false);
+
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+    }),
+  });
+
+  //* * UPDATE APLICATION ....................................................
+
+  const ChecUpdadeDevice = React.useCallback(async () => {
+    // const { isAvailable } = await Updates.checkForUpdateAsync();
+    // if (isAvailable) {
+    //   setModalUpdates(true);
+    // }
+  }, []);
+
+  const ReloadDevice = React.useCallback(async () => {
+    await Updates.fetchUpdateAsync();
+    await Updates.reloadAsync();
+  }, []);
+
+  // React.useEffect(() => {
+  //   const event = AppState.addEventListener('change', h => {
+  //     if (h === 'active') {
+  //       ChecUpdadeDevice();
+  //     }
+  //   });
+
+  //   return () => {
+  //     event.remove();
+  //   };
+  // }, [ChecUpdadeDevice]);
+
+  //* * .......................................................................
+
+  const [loaded] = useFonts({
+    Comfortaa_400Regular,
+    Comfortaa_500Medium,
+    Comfortaa_700Bold,
+  });
+
+  if (!loaded) {
+    return <ActivityIndicator />;
+  }
+
+  const queryClient = new QueryClient();
+
   return (
     <NativeBaseProvider>
-      <Box flex="1">
-        <Routes />
-      </Box>
+      <AuthContextProvider>
+        <QueryClientProvider client={queryClient}>
+          <Box flex="1">
+            <StatusBar style="light" />
+            <Route />
+          </Box>
+        </QueryClientProvider>
+      </AuthContextProvider>
     </NativeBaseProvider>
   );
 }

@@ -1,0 +1,82 @@
+{
+  "project_info": {
+    "project_number": "508175556379",
+    "project_id": "appgeb",
+    "storage_bucket": "appgeb.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:508175556379:android:07f36ebb4cfd85c477bdbe",
+        "android_client_info": {
+          "package_name": "com.aplicativogeb"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "508175556379-b67gth1utqhflao9s87neao6fkrjoach.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA0C-FzdLA4NeSQ69LzhjJyDRJEB43q_0Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "508175556379-b67gth1utqhflao9s87neao6fkrjoach.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "508175556379-dd5e2e8r8psauupkri5iotocqvnsg0jf.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "org.name.geb"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:508175556379:android:c2914ae86787676e77bdbe",
+        "android_client_info": {
+          "package_name": "com.appc.gebtraining"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "508175556379-b67gth1utqhflao9s87neao6fkrjoach.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA0C-FzdLA4NeSQ69LzhjJyDRJEB43q_0Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "508175556379-b67gth1utqhflao9s87neao6fkrjoach.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "508175556379-dd5e2e8r8psauupkri5iotocqvnsg0jf.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "org.name.geb"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

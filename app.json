@@ -1,35 +1,48 @@
 {
   "expo": {
-    "name": "base-1",
-    "slug": "base-1",
+    "name": "aplicativogeb",
+    "slug": "aplicativogeb",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
-      "resizeMode": "contain",
+      "resizeMode": "cover",
       "backgroundColor": "#ffffff"
     },
     "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.app-c.appGeb",
+      "googleServicesFile": "google-ios.plist"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.appc.gebtraining",
+      "googleServicesFile": "google-android.json"
     },
-
     "plugins": [
-      ["expo-notifications", {"color": "#000000"}]
+      "@react-native-firebase/app",
+      [
+        "expo-notifications",
+        {
+          "color": "#000000"
+        }
+      ]
     ],
-
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "3f0c01b7-dfb6-4ce3-a5c8-32950dc2f3b1"
+      }
     }
   }
 }
