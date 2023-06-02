@@ -12,8 +12,10 @@ import { Indicacoes } from '../pages/Indicacoes';
 import { Padrinho } from '../pages/Padrinho';
 import { Profile } from '../pages/Profile';
 import { Valide } from '../pages/ValidePresenca';
+import { Visitante } from '../pages/Visitante';
 import { StackB2b } from '../routes/StackB2b';
 import { StacKMembros } from '../routes/StackMembros';
+import { TabBarApp } from '../routes/TabBarApp';
 
 export const rotas = [
   {
@@ -71,6 +73,14 @@ export const rotas = [
     name: 'B2B',
     component: StackB2b,
     icon: 'users',
+  },
+
+  {
+    focus: theme.colors.focus,
+    color: theme.colors.focus_light_3,
+    name: 'CONVIDADOS',
+    component: Visitante,
+    icon: 'user-plus',
   },
 ];
 

@@ -20,12 +20,8 @@ export default {
   },
 
   fonts: {
-    BarLight: 'BarlowCondensed_300Light',
-    BarRegular: 'BarlowCondensed_400Regular',
-    OpenLight: 'OpenSansCondensed_300Light',
-    OpenBold: 'OpenSansCondensed_700Bold',
     regular: 'Comfortaa_400Regular',
-    blac: 'Roboto_900Black',
-    tenor: 'Comfortaa_500Medium',
+    medium: 'Comfortaa_500Medium',
+    bold: 'Comfortaa_700Bold',
   },
 };

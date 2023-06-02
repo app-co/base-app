@@ -64,21 +64,21 @@ export interface IOrderTransaction {
   prestador_id: string;
   valor: number;
   descricao: string;
-  createdAt: Date;
+  createdAt?: Date;
 }
 
 export interface ITransaction {
-  id: string;
-  consumidor_name: string;
+  id?: string;
+  consumidor_name?: string;
   prestador_name: string;
-  consumidor_id: string;
-
+  consumidor_id?: string;
+  order_id?: string;
   prestador_id: string;
   valor: number;
   descricao: string;
-  created_at: Date;
-  date: string;
-  valorFormated: string;
+  created_at?: Date;
+  date?: string;
+  valorFormated?: string;
 }
 
 export interface IB2b {
@@ -94,7 +94,7 @@ export interface IB2b {
 }
 
 export interface IIndicationDto {
-  id: string;
+  id?: string;
   indicado_id: string;
   indicado_name: string;
   quemIndicou_id: string;
@@ -102,7 +102,8 @@ export interface IIndicationDto {
   client_name: string;
   phone_number_client: number;
   description: string;
-  validate: boolean;
+  validate?: boolean;
+  createdAt?: Date;
 }
 
 export interface ILinkDto {
@@ -135,4 +136,21 @@ export interface IStars {
   fk_id_user: string;
   star: number;
   valiador: string;
+}
+
+interface IPropsPonts {
+  id: string;
+  nome: string;
+  pontos: 0;
+  valor: 0;
+  rank: 2;
+}
+
+export interface ISelfPonts {
+  compras: IPropsPonts;
+  vendas: IPropsPonts;
+  presenca: IPropsPonts;
+  indication: IPropsPonts;
+  b2b: IPropsPonts;
+  padrinho: IPropsPonts;
 }

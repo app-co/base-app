@@ -3,548 +3,525 @@
 /* eslint-disable consistent-return */
 /* eslint-disable camelcase */
 /* eslint-disable import/prefer-default-export */
-import React, {
-   useCallback,
-   useContext,
-   useEffect,
-   useMemo,
-   useState,
-} from 'react';
-import { FlatList, ScrollView, TextInput, View } from 'react-native';
 import { format, getMonth, getYear } from 'date-fns';
+import React, { useContext, useState } from 'react';
+import { FlatList, ScrollView, TextInput, View } from 'react-native';
 
-import { useFocusEffect } from '@react-navigation/native';
-
-import fire from '@react-native-firebase/firestore';
-import {
-   BoxFiltros,
-   BoxFiltroTouch,
-   BoxTotal,
-   BoxTypeTransaction,
-   BoxTypeTransactionTouch,
-   Container,
-   Flat,
-   Text,
-   TextFiltro,
-   TextTypeTransaction,
-} from './styles';
-import { ListConsumo } from '../../components/ListConsumo';
-import { HeaderContaponent } from '../../components/HeaderComponent';
-import { useAuth } from '../../hooks/AuthContext';
-import { locale } from '../../utils/LocalStrigMoney';
-import { ITransaction, IUserDto } from '../../dtos';
-import theme from '../../global/styles/theme';
 import { colecao } from '../../collection';
+import { Header } from '../../components/Header';
+import { ListConsumo } from '../../components/ListConsumo';
+import { ITransaction, IUserDto } from '../../dtos';
 import { api } from '../../services/api';
-import { ApiContext } from '../../contexts';
+import {
+  BoxFiltros,
+  BoxFiltroTouch,
+  BoxTotal,
+  BoxTypeTransaction,
+  BoxTypeTransactionTouch,
+  Container,
+  Text,
+  TextFiltro,
+  TextTypeTransaction,
+} from './styles';
 
 export interface PropTransactions {
-   id: string;
-   prestador_id: string;
-   consumidor: string;
-   descricao: string;
-   type: 'entrada' | 'saida';
-   valor: string;
-   createdAt: string;
+  id: string;
+  prestador_id: string;
+  consumidor: string;
+  descricao: string;
+  type: 'entrada' | 'saida';
+  valor: string;
+  createdAt: string;
 }
 
 interface IQntGeral {
-   qntPadrinho: number;
-   qntPresenca: number;
-   qntIndicacao: number;
-   user_id: string;
+  qntPadrinho: number;
+  qntPresenca: number;
+  qntIndicacao: number;
+  user_id: string;
 }
 
 interface IIndication {
-   id: string;
-   posicao: string;
-   qntPosicao: number;
+  id: string;
+  posicao: string;
+  qntPosicao: number;
 }
 
 type Presença = {
-   nome: string;
-   data: string;
-   status: string;
+  nome: string;
+  data: string;
+  status: string;
 };
 
 export function Consumo() {
-   const { transactionConsumidor, transactionPrestador } =
-      useContext(ApiContext);
+  const [transactionP, setTransactionP] = useState<ITransaction[]>([]);
+  const [transactionC, setTransactionC] = useState<ITransaction[]>([]);
+  const [type, setType] = useState('entrada');
+  const [filtro, setFiltro] = useState('mes');
 
-   const [transactionP, setTransactionP] = useState<ITransaction[]>([]);
-   const [transactionC, setTransactionC] = useState<ITransaction[]>([]);
-   const [type, setType] = useState('entrada');
-   const [filtro, setFiltro] = useState('mes');
-   const [presenca, setPresenca] = useState<Presença[]>([]);
-   const [indicacao, setIndicacao] = useState<IIndication>();
-   const [qntGeral, setQntGeral] = useState<IQntGeral[]>([]);
-   const [qntB2b, setQntB2b] = useState<[]>([]);
+  //* *..........................................................................
 
-   const { user } = useAuth();
+  const listTransaction = React.useCallback(async () => {
+    const vp = 0;
+    const vl = 0;
+    try {
+      await api.get('transaction/list-by-prestador').then(h => {
+        const rs = h.data as ITransaction[];
+        const ft = rs.map(p => {
+          const { valor } = p;
 
-   //* *..........................................................................
+          const valorFormated = valor.toLocaleString('pt-BR', {
+            style: 'currency',
+            currency: 'BRL',
+          });
+          return {
+            ...p,
+            date: format(new Date(p.created_at), 'dd-MM-yyyy'),
+            valorFormated,
+            valor,
+          };
+        });
+        setTransactionP(ft);
+      });
 
-   const listTransaction = React.useCallback(async () => {
-      const vp = 0;
-      const vl = 0;
-      try {
-         await api.get('transaction/list-by-prestador').then(h => {
-            const rs = h.data as ITransaction[];
-            const ft = rs.map(p => {
-               const { valor } = p;
+      await api.get('transaction/list-by-consumidor').then(h => {
+        const rs = h.data as ITransaction[];
+        const ft = rs.map(p => {
+          const { valor } = p;
+          const valorFormated = valor.toLocaleString('pt-BR', {
+            style: 'currency',
+            currency: 'BRL',
+          });
+          return {
+            ...p,
+            date: format(new Date(p.created_at), 'dd-MM-yyyy'),
+            valorFormated,
+            valor,
+          };
+        });
+        setTransactionC(ft);
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  }, []);
 
-               const valorFormated = valor.toLocaleString('pt-BR', {
-                  style: 'currency',
-                  currency: 'BRL',
-               });
-               return {
-                  ...p,
-                  date: format(new Date(p.created_at), 'dd-MM-yyyy'),
-                  valorFormated,
-                  valor,
-               };
-            });
-            setTransactionP(ft);
-         });
+  React.useEffect(() => {
+    listTransaction();
+  }, [listTransaction]);
 
-         await api.get('transaction/list-by-consumidor').then(h => {
-            const rs = h.data as ITransaction[];
-            const ft = rs.map(p => {
-               const { valor } = p;
-               const valorFormated = valor.toLocaleString('pt-BR', {
-                  style: 'currency',
-                  currency: 'BRL',
-               });
-               return {
-                  ...p,
-                  date: format(new Date(p.created_at), 'dd-MM-yyyy'),
-                  valorFormated,
-                  valor,
-               };
-            });
-            setTransactionC(ft);
-         });
-      } catch (err) {
-         console.log(err);
+  const extrato = React.useMemo(() => {
+    const month = new Date(Date.now()).getMonth() + 1;
+    const year = new Date(Date.now()).getFullYear();
+    const day = new Date(Date.now()).getDate();
+
+    const prestador = transactionP.filter(h => {
+      const [dia, mes, ano, hora, menutos] = h.date.split('-').map(Number);
+
+      if (filtro === 'mes' && month === mes) {
+        return {
+          ...h,
+        };
       }
-   }, []);
 
-   React.useEffect(() => {
-      listTransaction();
-   }, [listTransaction]);
+      if (filtro === 'ano' && ano === year) {
+        return {
+          ...h,
+        };
+      }
 
-   const extrato = React.useMemo(() => {
-      const month = new Date(Date.now()).getMonth() + 1;
-      const year = new Date(Date.now()).getFullYear();
-      const day = new Date(Date.now()).getDate();
+      if (filtro === 'todos') {
+        return {
+          ...h,
+        };
+      }
+    });
 
-      const prestador = transactionP.filter(h => {
-         const [dia, mes, ano, hora, menutos] = h.date.split('-').map(Number);
+    const subTotalP = prestador.reduce((ac, item) => {
+      return ac + item.valor;
+    }, 0);
 
-         if (filtro === 'mes' && month === mes) {
-            return {
-               ...h,
-            };
-         }
+    const totalP = subTotalP.toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    });
 
-         if (filtro === 'ano' && ano === year) {
-            return {
-               ...h,
-            };
-         }
+    const consumidor = transactionC.filter(h => {
+      const [dia, mes, ano, hora, menutos] = h.date.split('-').map(Number);
 
-         if (filtro === 'todos') {
-            return {
-               ...h,
-            };
-         }
-      });
+      if (filtro === 'mes' && month === mes) {
+        return {
+          ...h,
+        };
+      }
 
-      const subTotalP = prestador.reduce((ac, item) => {
-         return ac + item.valor;
-      }, 0);
+      if (filtro === 'ano' && ano === year) {
+        return {
+          ...h,
+        };
+      }
 
-      const totalP = subTotalP.toLocaleString('pt-BR', {
-         style: 'currency',
-         currency: 'BRL',
-      });
+      if (filtro === 'todos') {
+        return {
+          ...h,
+        };
+      }
+    });
 
-      const consumidor = transactionC.filter(h => {
-         const [dia, mes, ano, hora, menutos] = h.date.split('-').map(Number);
+    const subTotalC = consumidor.reduce((ac, item) => {
+      return ac + item.valor;
+    }, 0);
 
-         if (filtro === 'mes' && month === mes) {
-            return {
-               ...h,
-            };
-         }
+    const totalC = subTotalC.toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    });
 
-         if (filtro === 'ano' && ano === year) {
-            return {
-               ...h,
-            };
-         }
+    return {
+      prestador,
+      consumidor,
+      totalP,
+      totalC,
+    };
+  }, [filtro, transactionC, transactionP]);
 
-         if (filtro === 'todos') {
-            return {
-               ...h,
-            };
-         }
-      });
+  //* *..........................................................................
 
-      const subTotalC = consumidor.reduce((ac, item) => {
-         return ac + item.valor;
-      }, 0);
+  // todo VENDA ................................................................
+  // const venda = useMemo(() => {
+  //    return response.filter(h => {
+  //       return h.prestador_id === user.id;
+  //    });
+  // }, [response, user.id]);
 
-      const totalC = subTotalC.toLocaleString('pt-BR', {
-         style: 'currency',
-         currency: 'BRL',
-      });
+  // const formatedVenda = useMemo(() => {
+  // const res = venda.filter(h => {
+  //    const [dia, mes, ano, hora, menutos] = h.createdAt
+  //       .split('-')
+  //       .map(Number);
+  //    const month = new Date(Date.now()).getMonth() + 1;
+  //    const year = new Date(Date.now()).getFullYear();
+  //    const day = new Date(Date.now()).getDate();
+  //    if (filtro === 'mes' && month === mes) {
+  //       return {
+  //          ...h,
+  //       };
+  //    }
+  //    if (filtro === 'ano' && ano === year) {
+  //       return {
+  //          ...h,
+  //       };
+  //    }
+  //    if (filtro === 'todos') {
+  //       return {
+  //          ...h,
+  //       };
+  //    }
+  // });
+  //    // return res.map(h => {
+  //    //    const [dia, mes, ano, hora, menutos] = h.createdAt
+  //    //       .split('-')
+  //    //       .map(Number);
+  //    //    const total = Number(h.valor).toLocaleString('pt-BR', {
+  //    //       style: 'currency',
+  //    //       currency: 'BRL',
+  //    //    });
+  //    //    return {
+  //    //       ...h,
+  //    //       total,
+  //    //       data: `${dia}/${mes}/${ano}`,
+  //    //    };
+  //    // });
+  // }, []);
 
-      return {
-         prestador,
-         consumidor,
-         totalP,
-         totalC,
-      };
-   }, [filtro, transactionC, transactionP]);
+  // todo ......................................................................
 
-   //* *..........................................................................
+  // const Consumidor = useMemo(() => {
+  //    return response.filter(h => {
+  //       return h.consumidor === user.id;
+  //    });
+  // }, [user]);
 
-   // todo VENDA ................................................................
-   // const venda = useMemo(() => {
-   //    return response.filter(h => {
-   //       return h.prestador_id === user.id;
-   //    });
-   // }, [response, user.id]);
+  // const formatedConsumidor = useMemo(() => {
+  //    const res = Consumidor.filter(h => {
+  //       const [dia, mes, ano, hora, menutos] = h.createdAt
+  //          .split('-')
+  //          .map(Number);
 
-   // const formatedVenda = useMemo(() => {
-   // const res = venda.filter(h => {
-   //    const [dia, mes, ano, hora, menutos] = h.createdAt
-   //       .split('-')
-   //       .map(Number);
-   //    const month = new Date(Date.now()).getMonth() + 1;
-   //    const year = new Date(Date.now()).getFullYear();
-   //    const day = new Date(Date.now()).getDate();
-   //    if (filtro === 'mes' && month === mes) {
-   //       return {
-   //          ...h,
-   //       };
-   //    }
-   //    if (filtro === 'ano' && ano === year) {
-   //       return {
-   //          ...h,
-   //       };
-   //    }
-   //    if (filtro === 'todos') {
-   //       return {
-   //          ...h,
-   //       };
-   //    }
-   // });
-   //    // return res.map(h => {
-   //    //    const [dia, mes, ano, hora, menutos] = h.createdAt
-   //    //       .split('-')
-   //    //       .map(Number);
-   //    //    const total = Number(h.valor).toLocaleString('pt-BR', {
-   //    //       style: 'currency',
-   //    //       currency: 'BRL',
-   //    //    });
-   //    //    return {
-   //    //       ...h,
-   //    //       total,
-   //    //       data: `${dia}/${mes}/${ano}`,
-   //    //    };
-   //    // });
-   // }, []);
+  //       const month = new Date(Date.now()).getMonth() + 1;
+  //       const year = new Date(Date.now()).getFullYear();
+  //       const day = new Date(Date.now()).getDate();
 
-   // todo ......................................................................
+  //       if (filtro === 'mes' && month === mes) {
+  //          return {
+  //             ...h,
+  //          };
+  //       }
 
-   // const Consumidor = useMemo(() => {
-   //    return response.filter(h => {
-   //       return h.consumidor === user.id;
-   //    });
-   // }, [user]);
+  //       if (filtro === 'ano' && ano === year) {
+  //          return {
+  //             ...h,
+  //          };
+  //       }
 
-   // const formatedConsumidor = useMemo(() => {
-   //    const res = Consumidor.filter(h => {
-   //       const [dia, mes, ano, hora, menutos] = h.createdAt
-   //          .split('-')
-   //          .map(Number);
+  //       if (filtro === 'todos') {
+  //          return {
+  //             ...h,
+  //          };
+  //       }
+  //    });
 
-   //       const month = new Date(Date.now()).getMonth() + 1;
-   //       const year = new Date(Date.now()).getFullYear();
-   //       const day = new Date(Date.now()).getDate();
+  //    return res.map(h => {
+  //       const [dia, mes, ano, hora, menutos] = h.createdAt
+  //          .split('-')
+  //          .map(Number);
+  //       const total = Number(h.valor).toLocaleString('pt-BR', {
+  //          style: 'currency',
+  //          currency: 'BRL',
+  //       });
 
-   //       if (filtro === 'mes' && month === mes) {
-   //          return {
-   //             ...h,
-   //          };
-   //       }
+  //       return {
+  //          ...h,
+  //          total,
+  //          data: `${dia}/${mes}/${ano}`,
+  //       };
+  //    });
+  // }, [Consumidor, filtro]);
 
-   //       if (filtro === 'ano' && ano === year) {
-   //          return {
-   //             ...h,
-   //          };
-   //       }
+  // const handleTotalPrestador = useMemo(() => {
+  //    const tota = formatedVenda.reduce((acc, ind) => {
+  //       return acc + Number(ind.valor);
+  //    }, 0);
+  //    const no = Number(tota).toLocaleString('pt-BR', {
+  //       style: 'currency',
+  //       currency: 'BRL',
+  //    });
 
-   //       if (filtro === 'todos') {
-   //          return {
-   //             ...h,
-   //          };
-   //       }
-   //    });
+  //    return no;
+  // }, [formatedVenda]);
 
-   //    return res.map(h => {
-   //       const [dia, mes, ano, hora, menutos] = h.createdAt
-   //          .split('-')
-   //          .map(Number);
-   //       const total = Number(h.valor).toLocaleString('pt-BR', {
-   //          style: 'currency',
-   //          currency: 'BRL',
-   //       });
+  // const handleTotalConsumidor = useMemo(() => {
+  //    const tota = formatedConsumidor.reduce((acc, ind) => {
+  //       return acc + Number(ind.valor);
+  //    }, 0);
 
-   //       return {
-   //          ...h,
-   //          total,
-   //          data: `${dia}/${mes}/${ano}`,
-   //       };
-   //    });
-   // }, [Consumidor, filtro]);
+  //    return locale(String(tota));
+  // }, [formatedConsumidor]);
 
-   // const handleTotalPrestador = useMemo(() => {
-   //    const tota = formatedVenda.reduce((acc, ind) => {
-   //       return acc + Number(ind.valor);
-   //    }, 0);
-   //    const no = Number(tota).toLocaleString('pt-BR', {
-   //       style: 'currency',
-   //       currency: 'BRL',
-   //    });
+  // const QntGeral = useCallback(async () => {
+  //    fire()
+  //       .collection(colecao.users)
+  //       .get()
+  //       .then(res => {
+  //          const users = res.docs.map(h => {
+  //             return h.data() as IUserDto;
+  //          });
 
-   //    return no;
-   // }, [formatedVenda]);
+  //          fire()
+  //             .collection(colecao.presenca)
+  //             .get()
+  //             .then(res => {
+  //                const data = res.docs
+  //                   .map(h => h.data())
+  //                   .filter(p => p.user_id === user.id && p.presenca === true);
 
-   // const handleTotalConsumidor = useMemo(() => {
-   //    const tota = formatedConsumidor.reduce((acc, ind) => {
-   //       return acc + Number(ind.valor);
-   //    }, 0);
+  //                const resP = res.docs
+  //                   .map(h => h.data())
+  //                   .filter(p => p.user_id === user.id);
 
-   //    return locale(String(tota));
-   // }, [formatedConsumidor]);
+  //                setPresenca(
+  //                   resP.map(h => {
+  //                      return {
+  //                         nome: h.nome,
+  //                         data: format(
+  //                            new Date(h.createdAt),
+  //                            'dd/MM/yyyy - HH:mm',
+  //                         ),
+  //                         status: h.presenca ? 'validado' : 'pendente',
+  //                      };
+  //                   }),
+  //                );
 
-   // const QntGeral = useCallback(async () => {
-   //    fire()
-   //       .collection(colecao.users)
-   //       .get()
-   //       .then(res => {
-   //          const users = res.docs.map(h => {
-   //             return h.data() as IUserDto;
-   //          });
+  //                const filter = users.map(h => {
+  //                   const p = data.length + 2;
+  //                   return {
+  //                      qntPadrinho: h.padrinhQuantity,
+  //                      qntPresenca: p,
+  //                      qntIndicacao: h.indicacao,
+  //                      user_id: h.id,
+  //                   };
+  //                });
 
-   //          fire()
-   //             .collection(colecao.presenca)
-   //             .get()
-   //             .then(res => {
-   //                const data = res.docs
-   //                   .map(h => h.data())
-   //                   .filter(p => p.user_id === user.id && p.presenca === true);
+  //                setQntGeral(filter);
+  //             });
+  //       });
+  // }, [user.id]);
 
-   //                const resP = res.docs
-   //                   .map(h => h.data())
-   //                   .filter(p => p.user_id === user.id);
+  return (
+    <Container>
+      <Header />
 
-   //                setPresenca(
-   //                   resP.map(h => {
-   //                      return {
-   //                         nome: h.nome,
-   //                         data: format(
-   //                            new Date(h.createdAt),
-   //                            'dd/MM/yyyy - HH:mm',
-   //                         ),
-   //                         status: h.presenca ? 'validado' : 'pendente',
-   //                      };
-   //                   }),
-   //                );
-
-   //                const filter = users.map(h => {
-   //                   const p = data.length + 2;
-   //                   return {
-   //                      qntPadrinho: h.padrinhQuantity,
-   //                      qntPresenca: p,
-   //                      qntIndicacao: h.indicacao,
-   //                      user_id: h.id,
-   //                   };
-   //                });
-
-   //                setQntGeral(filter);
-   //             });
-   //       });
-   // }, [user.id]);
-
-   return (
-      <Container>
-         <HeaderContaponent type="tipo1" title="Extrato" />
-
-         <View style={{ height: 70 }}>
-            <ScrollView
-               horizontal
-               style={{
-                  flex: 1,
-               }}
-               contentContainerStyle={{
-                  height: 70,
-               }}
+      <View style={{ height: 70 }}>
+        <ScrollView
+          horizontal
+          style={{
+            flex: 1,
+          }}
+          contentContainerStyle={{
+            height: 70,
+          }}
+        >
+          <BoxTypeTransaction>
+            <BoxTypeTransactionTouch
+              type={type === 'entrada'}
+              onPress={() => setType('entrada')}
             >
-               <BoxTypeTransaction>
-                  <BoxTypeTransactionTouch
-                     type={type === 'entrada'}
-                     onPress={() => setType('entrada')}
-                  >
-                     <TextTypeTransaction type={type === 'entrada'}>
-                        Entrada
-                     </TextTypeTransaction>
-                  </BoxTypeTransactionTouch>
+              <TextTypeTransaction type={type === 'entrada'}>
+                Entrada
+              </TextTypeTransaction>
+            </BoxTypeTransactionTouch>
 
-                  <BoxTypeTransactionTouch
-                     type={type === 'saida'}
-                     onPress={() => setType('saida')}
-                  >
-                     <TextTypeTransaction type={type === 'saida'}>
-                        Saida
-                     </TextTypeTransaction>
-                  </BoxTypeTransactionTouch>
+            <BoxTypeTransactionTouch
+              type={type === 'saida'}
+              onPress={() => setType('saida')}
+            >
+              <TextTypeTransaction type={type === 'saida'}>
+                Saida
+              </TextTypeTransaction>
+            </BoxTypeTransactionTouch>
 
-                  <BoxTypeTransactionTouch
-                     type={type === 'indicaçao'}
-                     onPress={() => setType('indicaçao')}
-                  >
-                     <TextTypeTransaction type={type === 'indicaçao'}>
-                        Indicações
-                     </TextTypeTransaction>
-                  </BoxTypeTransactionTouch>
+            <BoxTypeTransactionTouch
+              type={type === 'indicaçao'}
+              onPress={() => setType('indicaçao')}
+            >
+              <TextTypeTransaction type={type === 'indicaçao'}>
+                Indicações
+              </TextTypeTransaction>
+            </BoxTypeTransactionTouch>
 
-                  <BoxTypeTransactionTouch
-                     type={type === 'presença'}
-                     onPress={() => setType('presença')}
-                  >
-                     <TextTypeTransaction type={type === 'presença'}>
-                        Presença
-                     </TextTypeTransaction>
-                  </BoxTypeTransactionTouch>
+            <BoxTypeTransactionTouch
+              type={type === 'presença'}
+              onPress={() => setType('presença')}
+            >
+              <TextTypeTransaction type={type === 'presença'}>
+                Presença
+              </TextTypeTransaction>
+            </BoxTypeTransactionTouch>
 
-                  <BoxTypeTransactionTouch
-                     type={type === 'padrinho'}
-                     onPress={() => setType('padrinho')}
-                  >
-                     <TextTypeTransaction type={type === 'padrinho'}>
-                        Padrinho
-                     </TextTypeTransaction>
-                  </BoxTypeTransactionTouch>
+            <BoxTypeTransactionTouch
+              type={type === 'padrinho'}
+              onPress={() => setType('padrinho')}
+            >
+              <TextTypeTransaction type={type === 'padrinho'}>
+                Padrinho
+              </TextTypeTransaction>
+            </BoxTypeTransactionTouch>
 
-                  <BoxTypeTransactionTouch
-                     type={type === 'b2b'}
-                     onPress={() => setType('b2b')}
-                  >
-                     <TextTypeTransaction type={type === 'b2b'}>
-                        B2B
-                     </TextTypeTransaction>
-                  </BoxTypeTransactionTouch>
-               </BoxTypeTransaction>
-            </ScrollView>
-         </View>
+            <BoxTypeTransactionTouch
+              type={type === 'b2b'}
+              onPress={() => setType('b2b')}
+            >
+              <TextTypeTransaction type={type === 'b2b'}>
+                B2B
+              </TextTypeTransaction>
+            </BoxTypeTransactionTouch>
+          </BoxTypeTransaction>
+        </ScrollView>
+      </View>
 
-         {type === 'entrada' && (
-            <BoxFiltros>
-               <BoxFiltroTouch
-                  filtro={filtro === 'mes'}
-                  onPress={() => setFiltro('mes')}
-               >
-                  <TextFiltro filtro={filtro === 'mes'}>Mes</TextFiltro>
-               </BoxFiltroTouch>
+      {type === 'entrada' && (
+        <BoxFiltros>
+          <BoxFiltroTouch
+            filtro={filtro === 'mes'}
+            onPress={() => setFiltro('mes')}
+          >
+            <TextFiltro filtro={filtro === 'mes'}>Mes</TextFiltro>
+          </BoxFiltroTouch>
 
-               <BoxFiltroTouch
-                  filtro={filtro === 'ano'}
-                  onPress={() => setFiltro('ano')}
-               >
-                  <TextFiltro filtro={filtro === 'ano'}>Ano</TextFiltro>
-               </BoxFiltroTouch>
+          <BoxFiltroTouch
+            filtro={filtro === 'ano'}
+            onPress={() => setFiltro('ano')}
+          >
+            <TextFiltro filtro={filtro === 'ano'}>Ano</TextFiltro>
+          </BoxFiltroTouch>
 
-               <BoxFiltroTouch
-                  filtro={filtro === 'todos'}
-                  onPress={() => setFiltro('todos')}
-               >
-                  <TextFiltro filtro={filtro === 'todos'}>Todos</TextFiltro>
-               </BoxFiltroTouch>
-            </BoxFiltros>
-         )}
+          <BoxFiltroTouch
+            filtro={filtro === 'todos'}
+            onPress={() => setFiltro('todos')}
+          >
+            <TextFiltro filtro={filtro === 'todos'}>Todos</TextFiltro>
+          </BoxFiltroTouch>
+        </BoxFiltros>
+      )}
 
-         {type === 'saida' && (
-            <BoxFiltros>
-               <BoxFiltroTouch
-                  filtro={filtro === 'mes'}
-                  onPress={() => setFiltro('mes')}
-               >
-                  <TextFiltro filtro={filtro === 'mes'}>Mes</TextFiltro>
-               </BoxFiltroTouch>
+      {type === 'saida' && (
+        <BoxFiltros>
+          <BoxFiltroTouch
+            filtro={filtro === 'mes'}
+            onPress={() => setFiltro('mes')}
+          >
+            <TextFiltro filtro={filtro === 'mes'}>Mes</TextFiltro>
+          </BoxFiltroTouch>
 
-               <BoxFiltroTouch
-                  filtro={filtro === 'ano'}
-                  onPress={() => setFiltro('ano')}
-               >
-                  <TextFiltro filtro={filtro === 'ano'}>Ano</TextFiltro>
-               </BoxFiltroTouch>
+          <BoxFiltroTouch
+            filtro={filtro === 'ano'}
+            onPress={() => setFiltro('ano')}
+          >
+            <TextFiltro filtro={filtro === 'ano'}>Ano</TextFiltro>
+          </BoxFiltroTouch>
 
-               <BoxFiltroTouch
-                  filtro={filtro === 'todos'}
-                  onPress={() => setFiltro('todos')}
-               >
-                  <TextFiltro filtro={filtro === 'todos'}>Todos</TextFiltro>
-               </BoxFiltroTouch>
-            </BoxFiltros>
-         )}
+          <BoxFiltroTouch
+            filtro={filtro === 'todos'}
+            onPress={() => setFiltro('todos')}
+          >
+            <TextFiltro filtro={filtro === 'todos'}>Todos</TextFiltro>
+          </BoxFiltroTouch>
+        </BoxFiltros>
+      )}
 
-         <BoxTotal>
-            <Text>Total</Text>
-            {type === 'entrada' && <Text>{extrato.totalP}</Text>}
-            {type === 'saida' && <Text>{extrato.totalC}</Text>}
-            {type === 'indicaçao' && <Text>em manutenção</Text>}
-            {type === 'presença' && <Text>em manutenção</Text>}
-            {type === 'padrinho' && <Text>em manutenção</Text>}
-            {type === 'b2b' && <Text>em manutenção</Text>}
-         </BoxTotal>
+      <BoxTotal>
+        <Text>Total</Text>
+        {type === 'entrada' && <Text>{extrato.totalP}</Text>}
+        {type === 'saida' && <Text>{extrato.totalC}</Text>}
+        {type === 'indicaçao' && <Text>em manutenção</Text>}
+        {type === 'presença' && <Text>em manutenção</Text>}
+        {type === 'padrinho' && <Text>em manutenção</Text>}
+        {type === 'b2b' && <Text>em manutenção</Text>}
+      </BoxTotal>
 
-         {type === 'entrada' && (
-            <FlatList
-               data={transactionP}
-               keyExtractor={h => h.id}
-               renderItem={({ item: h }) => (
-                  <View>
-                     <ListConsumo
-                        descricao={h.descricao}
-                        valor={h.valorFormated}
-                        data={h.date}
-                     />
-                  </View>
-               )}
-            />
-         )}
+      {type === 'entrada' && (
+        <FlatList
+          data={transactionP}
+          keyExtractor={h => h.id}
+          renderItem={({ item: h }) => (
+            <View>
+              <ListConsumo
+                descricao={h.descricao}
+                valor={h.valorFormated}
+                data={h.date}
+              />
+            </View>
+          )}
+        />
+      )}
 
-         {type === 'saida' && (
-            <FlatList
-               data={extrato.consumidor}
-               keyExtractor={h => h.id}
-               renderItem={({ item: h }) => (
-                  <View>
-                     <ListConsumo
-                        descricao={h.descricao}
-                        valor={h.valorFormated}
-                        data={h.date}
-                     />
-                  </View>
-               )}
-            />
-         )}
+      {type === 'saida' && (
+        <FlatList
+          data={extrato.consumidor}
+          keyExtractor={h => h.id}
+          renderItem={({ item: h }) => (
+            <View>
+              <ListConsumo
+                descricao={h.descricao}
+                valor={h.valorFormated}
+                data={h.date}
+              />
+            </View>
+          )}
+        />
+      )}
 
-         {/* 
+      {/* 
          {type === 'presença' && (
             <View style={{ marginTop: 24, flex: 1 }}>
                <FlatList
@@ -569,6 +546,6 @@ export function Consumo() {
                />
             </View>
          )} */}
-      </Container>
-   );
+    </Container>
+  );
 }

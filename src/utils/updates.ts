@@ -1,5 +1,5 @@
 export const update = [
-   { title: 'correção dos valores' },
-   { title: 'limpesa de cache' },
+  { title: 'correção de bugs' },
+  { title: 'Mudanças no layout' },
 ];
 export const version = '4.6.0';

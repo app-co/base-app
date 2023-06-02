@@ -10,7 +10,7 @@ export const Container = styled.View`
 `;
 
 export const Title = styled.Text`
-  font-family: ${fonts.blac};
+  font-family: ${fonts.bold};
   font-size: ${RFValue(16)}px;
   color: ${colors.text_secundary};
 `;

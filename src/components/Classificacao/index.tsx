@@ -6,6 +6,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useState } from 'react';
 import { ActivityIndicator, Alert, View } from 'react-native';
 
+import { ISelfPonts } from '../../dtos';
 import { api } from '../../services/api';
 import {
   BoxContainer,
@@ -31,7 +32,7 @@ interface Tips {
 }
 
 interface IProps {
-  item: any;
+  item: ISelfPonts;
 }
 
 export function Classificacao({ item }: IProps) {
@@ -87,11 +88,11 @@ export function Classificacao({ item }: IProps) {
           >
             <BoxContainer>
               <Title>COMPRAS</Title>
-              <Title>{item} pts</Title>
+              <Title>{item?.compras?.pontos} pts</Title>
             </BoxContainer>
 
             <BoxPosition>
-              <Title>{item}</Title>
+              <Title>{item?.compras?.rank}</Title>
             </BoxPosition>
           </View>
 
@@ -104,11 +105,11 @@ export function Classificacao({ item }: IProps) {
           >
             <BoxContainer>
               <Title>VENDAS</Title>
-              <Title>{item} pts</Title>
+              <Title>{item?.vendas?.pontos} pts</Title>
             </BoxContainer>
 
             <BoxPosition>
-              <Title>{item}</Title>
+              <Title>{item?.vendas?.rank}</Title>
             </BoxPosition>
           </View>
 
@@ -120,12 +121,12 @@ export function Classificacao({ item }: IProps) {
             }}
           >
             <BoxContainer>
-              <Title>Indicações</Title>
-              <Title>{item} pts</Title>
+              <Title>INDICAÇÕES</Title>
+              <Title>{item?.indication?.pontos} pts</Title>
             </BoxContainer>
 
             <BoxPosition>
-              <Title>{item}</Title>
+              <Title>{item?.indication?.rank}</Title>
             </BoxPosition>
           </View>
 
@@ -137,12 +138,12 @@ export function Classificacao({ item }: IProps) {
             }}
           >
             <BoxContainer>
-              <Title>Presença</Title>
-              <Title>{item} pts</Title>
+              <Title>PRESENÇA</Title>
+              <Title>{item?.presenca?.pontos} pts</Title>
             </BoxContainer>
 
             <BoxPosition>
-              <Title>{item}</Title>
+              <Title>{item?.presenca?.rank}</Title>
             </BoxPosition>
           </View>
 
@@ -154,12 +155,12 @@ export function Classificacao({ item }: IProps) {
             }}
           >
             <BoxContainer>
-              <Title>Padrinho</Title>
-              <Title>{item}pts</Title>
+              <Title>PADRINHO</Title>
+              <Title>{item?.padrinho?.pontos}pts</Title>
             </BoxContainer>
 
             <BoxPosition>
-              <Title>{item}</Title>
+              <Title>{item?.padrinho?.rank}</Title>
             </BoxPosition>
           </View>
 
@@ -172,11 +173,11 @@ export function Classificacao({ item }: IProps) {
           >
             <BoxContainer>
               <Title>B2B</Title>
-              <Title>{item}pts</Title>
+              <Title>{item?.b2b?.pontos}pts</Title>
             </BoxContainer>
 
             <BoxPosition>
-              <Title>{item}</Title>
+              <Title>{item?.b2b?.rank}</Title>
             </BoxPosition>
           </View>
         </BoxEventos>

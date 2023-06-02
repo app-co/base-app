@@ -25,6 +25,7 @@ import {
 } from 'native-base';
 import React, { useRef } from 'react';
 import { ActivityIndicator, AppState, LogBox, Modal, View } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { ThemeProvider } from 'styled-components/native';
 
@@ -52,10 +53,10 @@ export default function App() {
   //* * UPDATE APLICATION ....................................................
 
   const ChecUpdadeDevice = React.useCallback(async () => {
-    // const { isAvailable } = await Updates.checkForUpdateAsync();
-    // if (isAvailable) {
-    //   setModalUpdates(true);
-    // }
+    const { isAvailable } = await Updates.checkForUpdateAsync();
+    if (isAvailable) {
+      setModalUpdates(true);
+    }
   }, []);
 
   const ReloadDevice = React.useCallback(async () => {
@@ -63,17 +64,17 @@ export default function App() {
     await Updates.reloadAsync();
   }, []);
 
-  // React.useEffect(() => {
-  //   const event = AppState.addEventListener('change', h => {
-  //     if (h === 'active') {
-  //       ChecUpdadeDevice();
-  //     }
-  //   });
+  React.useEffect(() => {
+    const event = AppState.addEventListener('change', h => {
+      if (h === 'active') {
+        ChecUpdadeDevice();
+      }
+    });
 
-  //   return () => {
-  //     event.remove();
-  //   };
-  // }, [ChecUpdadeDevice]);
+    return () => {
+      event.remove();
+    };
+  }, [ChecUpdadeDevice]);
 
   //* * .......................................................................
 
@@ -93,10 +94,28 @@ export default function App() {
     <NativeBaseProvider>
       <AuthContextProvider>
         <QueryClientProvider client={queryClient}>
-          <Box flex="1">
-            <StatusBar style="light" />
-            <Route />
-          </Box>
+          <SafeAreaProvider>
+            <Box flex="1">
+              <StatusBar style="light" />
+              <Modal visible={showModalUpdate}>
+                <Center p="5" bg={theme.colors.primary}>
+                  <Box>
+                    <Text fontFamily={theme.fonts.bold} fontSize="16">
+                      UMA NOVA ATUALIZAÇÃO ESTA DISPONÍVEL
+                    </Text>
+                    {update.map(h => (
+                      <Text>{h.title}</Text>
+                    ))}
+                    <Text>{version}</Text>
+                  </Box>
+                  <ButtonBase onPress={ReloadDevice} mt="10">
+                    ATUALIZAR
+                  </ButtonBase>
+                </Center>
+              </Modal>
+              <Route />
+            </Box>
+          </SafeAreaProvider>
         </QueryClientProvider>
       </AuthContextProvider>
     </NativeBaseProvider>

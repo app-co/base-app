@@ -1,20 +1,20 @@
-import React from "react";
-import { Image, ScrollView, View } from "react-native";
-import { Container, Title } from "./styles";
-import imageFundo from "../../assets/imageMembros.jpeg";
+import React from 'react';
+import { Image, ScrollView, View } from 'react-native';
 
-import { HeaderContaponent } from "../../components/HeaderComponent";
+import imageFundo from '../../assets/imageMembros.jpeg';
+import { Header } from '../../components/Header';
+import { Container, Title } from './styles';
 
 export function InfoGeb() {
   return (
     <Container>
-      <HeaderContaponent title="Conheça o Geb" type="tipo1" onMessage="of" />
+      <Header />
 
       <Image
         source={imageFundo}
         style={{
-          width: "100%",
-          height: "30%",
+          width: '100%',
+          height: '30%',
           marginTop: 20,
         }}
       />

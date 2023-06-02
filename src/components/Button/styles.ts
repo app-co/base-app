@@ -14,7 +14,7 @@ export const Container = styled.TouchableOpacity`
 `;
 
 export const Title = styled.Text`
-  font-family: ${theme.fonts.blac};
+  font-family: ${theme.fonts.bold};
   color: ${theme.colors.focus};
   font-size: ${RFValue(18)}px;
 `;

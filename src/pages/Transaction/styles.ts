@@ -1,14 +1,16 @@
-import { TextInputMask } from "react-native-masked-text";
-import { RFValue } from "react-native-responsive-fontsize";
-import styled from "styled-components/native";
+import { TextInputMask } from 'react-native-masked-text';
+import { RFValue } from 'react-native-responsive-fontsize';
+import styled from 'styled-components/native';
+
+import theme from '../../global/styles/theme';
 
 export const Container = styled.View`
   flex: 1;
-  background-color: ${({ theme: h }) => h.colors.primary};
+  background-color: ${theme.colors.primary};
 `;
 
-export const Box = styled.View.attrs({
-  shadowColor: "#000",
+export const box = styled.View.attrs({
+  shadowColor: '#000',
   shadowOffset: {
     width: 0,
     height: 3,
@@ -19,10 +21,10 @@ export const Box = styled.View.attrs({
   elevation: 6,
 })`
   width: 100%;
-  height: ${RFValue(200)}px;
-  background-color: ${({ theme: h }) => h.colors.primary};
+  /* height: ${RFValue(200)}px; */
+  background-color: ${theme.colors.primary};
   align-items: center;
-  padding: 6px;
+  padding: 20px;
   border-radius: 16px;
 `;
 
@@ -61,7 +63,7 @@ export const ImageProviderOfice = styled.Image`
   width: ${RFValue(40)}px;
   border-radius: ${RFValue(25)}px;
   height: ${RFValue(40)}px;
-  background-color: ${({ theme: h }) => h.colors.focus_light};
+  background-color: ${theme.colors.focus_light};
   align-self: flex-start;
 `;
 
@@ -76,18 +78,18 @@ export const ImageOfice = styled.Image`
   width: ${RFValue(40)}px;
   border-radius: ${RFValue(25)}px;
   height: ${RFValue(40)}px;
-  background-color: ${({ theme: h }) => h.colors.focus_light};
+  background-color: ${theme.colors.focus_light};
   align-self: flex-end;
 `;
 
 export const Title = styled.Text`
   font-size: ${RFValue(16)}px;
-  font-family: ${({ theme: h }) => h.fonts.blac};
-  color: ${({ theme: h }) => h.colors.text};
+  font-family: ${theme.fonts.bold};
+  color: ${theme.colors.text};
 `;
 
 export const BoxInput = styled.View.attrs({
-  shadowColor: "#000",
+  shadowColor: '#000',
   shadowOffset: {
     width: 0,
     height: 3,
@@ -99,7 +101,7 @@ export const BoxInput = styled.View.attrs({
 })`
   width: 100%;
   height: ${RFValue(250)}px;
-  background-color: ${({ theme: h }) => h.colors.primary};
+  background-color: ${theme.colors.primary};
   /* flex-direction: row; */
   align-items: center;
   padding: 6px;
@@ -117,7 +119,7 @@ export const ContainerInput = styled.View`
 `;
 
 export const InputText = styled(TextInputMask)`
-  font-family: ${({ theme: h }) => h.fonts.regular};
+  font-family: ${theme.fonts.regular};
   font-size: ${RFValue(12)}px;
 `;
 
@@ -125,7 +127,7 @@ export const Buton = styled.TouchableOpacity`
   width: ${RFValue(250)}px;
   height: ${RFValue(40)}px;
   border-radius: ${RFValue(10)}px;
-  background-color: ${({ theme: h }) => h.colors.focus};
+  background-color: ${theme.colors.focus};
   align-self: center;
   align-items: center;
   justify-content: center;

@@ -32,9 +32,8 @@ type AuthState = {
   token: string;
   user: IUserDtos;
 };
-
-const keyToken = '@geb:token';
-const key = '@geb:geb';
+const keyToken = '@appGeb:token';
+const key = '@appGeb:user';
 
 export const AuthContext = createContext<IAuthContextData>(
   {} as IAuthContextData,

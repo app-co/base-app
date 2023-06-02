@@ -1,9 +1,10 @@
 /* eslint-disable import/prefer-default-export */
-import React, { useCallback } from "react";
-import { Button, Dimensions, Modal, View } from "react-native";
-import { AntDesign } from "@expo/vector-icons";
-import { RFValue } from "react-native-responsive-fontsize";
-import image from "../../assets/download.jpg";
+import { AntDesign } from '@expo/vector-icons';
+import React, { useCallback } from 'react';
+import { Button, Dimensions, Modal, View } from 'react-native';
+import { RFValue } from 'react-native-responsive-fontsize';
+
+import image from '../../assets/download.jpg';
 import {
   BoxAvatar,
   BoxImage,
@@ -14,9 +15,9 @@ import {
   SubTitle,
   Titl,
   Title,
-} from "./styles";
+} from './styles';
 
-const { width, height } = Dimensions.get("screen");
+const { width, height } = Dimensions.get('screen');
 const ITEM_WIDTH = width * 1;
 const ITEM_HEIGHT = ITEM_WIDTH * 0.6;
 
@@ -28,7 +29,7 @@ interface Props {
 
 export function Noticias({ pres, titulo, subTitulo }: Props) {
   const pre = useCallback(() => {
-    console.log("ok");
+    console.log('ok');
   }, []);
 
   return (

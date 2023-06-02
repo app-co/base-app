@@ -1,17 +1,16 @@
-import { he } from "date-fns/locale";
-import { Feather } from "@expo/vector-icons";
-import { RFValue, RFPercentage } from "react-native-responsive-fontsize";
-import styled from "styled-components/native";
-import { Dimensions, FlatList } from "react-native";
-import { TextInputMask } from "react-native-masked-text";
-import { IUserDto } from "../../DtosUser/index";
-import theme from "../../global/styles/theme";
+import { Feather } from '@expo/vector-icons';
+import { Dimensions, FlatList } from 'react-native';
+import { TextInputMask } from 'react-native-masked-text';
+import { RFValue, RFPercentage } from 'react-native-responsive-fontsize';
+import styled from 'styled-components/native';
+
+import theme from '../../global/styles/theme';
 
 const { colors, fonts } = theme;
-const { height, width } = Dimensions.get("screen");
+const { height, width } = Dimensions.get('screen');
 
 export const BoxHeader = styled.View.attrs({
-  shadowColor: "#000",
+  shadowColor: '#000',
   shadowOffset: {
     width: 0,
     height: 2,
@@ -32,7 +31,7 @@ export const BoxHeader = styled.View.attrs({
 
 export const Container = styled.View`
   /* padding: 20px 20px 30px 20px; */
-  background-color: ${({ theme: h }) => h.colors.primary};
+  background-color: ${theme.colors.primary};
   flex: 1;
 `;
 
@@ -70,12 +69,12 @@ export const Avatar = styled.Image`
 
 export const TitleHeader = styled.Text`
   color: ${colors.focus};
-  font-family: ${fonts.blac};
+  font-family: ${fonts.bold};
   font-size: ${RFValue(16)}px;
 `;
 
 export const BoxFormularios = styled.View.attrs({
-  shadowColor: "#000",
+  shadowColor: '#000',
   shadowOffset: {
     width: 0,
     height: 2,
@@ -167,9 +166,7 @@ export const LogoImage = styled.Image`
 `;
 
 export const TitleButton = styled.Text`
-  font-family: ${fonts.tenor};
+  font-family: ${fonts.bold};
   font-size: ${RFValue(24)}px;
   color: ${colors.text_secundary};
 `;
-
-export const FlatLink = styled(FlatList as new () => FlatList<IUserDto>)``;
