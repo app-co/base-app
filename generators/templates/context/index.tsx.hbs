@@ -1,0 +1,9 @@
+import { useContext } from 'react';
+
+import{ {{pascalCase name}}ContexProvider } from './context';
+
+export function use{{pascalCase name}}() {
+  const context = useContext({{pascalCase name}}ContexProvider);
+
+  return context;
+}

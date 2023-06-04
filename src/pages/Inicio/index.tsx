@@ -43,6 +43,9 @@ import { ListB2bOrder } from '../../components/ListB2bOrder';
 import { ListTransactionOrder } from '../../components/ListTransactionOrder';
 import { ModalComp } from '../../components/ModalComp';
 import { OrderIndicationComp } from '../../components/OrderIndicationComp';
+import { useB2b } from '../../contexts/b2b';
+import { useIndication } from '../../contexts/indication';
+import { useOrderTransaction } from '../../contexts/orderTransaction';
 import { useCreation } from '../../contexts/useCreation';
 import { useData } from '../../contexts/useData';
 import { useOrders } from '../../contexts/useOrders';
@@ -69,11 +72,8 @@ interface PropsValorTotal {
 }
 
 export function Inicio() {
-  const { user } = useAuth();
-  const navigate = useNavigation();
+  const { user, logOut } = useAuth();
   const { indRank } = useData();
-  const { loadOrderB2b, loadOrderTransaction, loadOrderIndication } =
-    useOrders();
   const {
     aprovedB2b,
     deletB2b,
@@ -81,8 +81,13 @@ export function Inicio() {
     deleteOrderTransaction,
     createTransaction,
     aprovedOrderIndication,
-    deleteOrderIndication,
   } = useCreation();
+
+  const { b2bListMe } = useB2b();
+  const { orderTransactionListByPrestador } = useOrderTransaction();
+  const { indicationListMe } = useIndication();
+
+  console.log(b2bListMe.error, indicationListMe.error, 'ok');
 
   const [showOrderB2b, setShowOrderB2b] = React.useState(false);
   const [shwTransaction, setShowTransaction] = React.useState(false);
@@ -96,16 +101,16 @@ export function Inicio() {
   const [valorGeb, setValorGeb] = React.useState<PropsValorTotal>();
 
   const orders = React.useMemo(() => {
-    let b2b = (loadOrderB2b.data as IB2b[]) || [];
-    let indication = (loadOrderIndication.data as IIndicationDto[]) || [];
+    let b2b = (b2bListMe.data as IB2b[]) || [];
+    let indication = (indicationListMe.data as IIndicationDto[]) || [];
     const transaction =
-      (loadOrderTransaction.data as IOrderTransaction[]) || [];
+      (orderTransactionListByPrestador.data as IOrderTransaction[]) || [];
 
-    if (!loadOrderB2b.isLoading) {
+    if (!b2bListMe.isLoading) {
       b2b = b2b.filter(h => h.validate === false);
     }
 
-    if (!loadOrderIndication.isLoading) {
+    if (!indicationListMe.isLoading) {
       indication = indication
         .filter((h, i) => {
           if (h.validate === false) {
@@ -117,11 +122,11 @@ export function Inicio() {
 
     return { b2b, transaction, indication };
   }, [
-    loadOrderB2b.data,
-    loadOrderB2b.isLoading,
-    loadOrderIndication.data,
-    loadOrderIndication.isLoading,
-    loadOrderTransaction.data,
+    b2bListMe.data,
+    b2bListMe.isLoading,
+    indicationListMe.data,
+    indicationListMe.isLoading,
+    orderTransactionListByPrestador.data,
     indexIndication,
   ]);
 
@@ -142,18 +147,18 @@ export function Inicio() {
   const confirmatioOrderB2b = React.useCallback(
     async (id: string) => {
       aprovedB2b(id).then(h => {
-        loadOrderB2b.refetch();
+        b2bListMe.refetch();
       });
     },
-    [aprovedB2b, loadOrderB2b],
+    [aprovedB2b, b2bListMe],
   );
 
   const recuseOrderB2b = React.useCallback(
     async (id: string) => {
       await deletB2b(id);
-      loadOrderB2b.refetch();
+      b2bListMe.refetch();
     },
-    [deletB2b, loadOrderB2b],
+    [deletB2b, b2bListMe],
   );
 
   const confirmatioTransaction = React.useCallback(
@@ -168,18 +173,18 @@ export function Inicio() {
         valor: item.valor,
       };
       aprovedOrderTransaction(dados).then(h => {
-        loadOrderTransaction.refetch();
+        orderTransactionListByPrestador.refetch();
       });
     },
-    [aprovedOrderTransaction, loadOrderTransaction],
+    [aprovedOrderTransaction, orderTransactionListByPrestador],
   );
 
   const recuseTransactionOrder = React.useCallback(
     async (id: string) => {
       await deleteOrderTransaction(id);
-      loadOrderTransaction.refetch();
+      orderTransactionListByPrestador.refetch();
     },
-    [deleteOrderTransaction, loadOrderTransaction],
+    [deleteOrderTransaction, orderTransactionListByPrestador],
   );
 
   const loadVendas = React.useCallback(async () => {
@@ -243,7 +248,7 @@ export function Inicio() {
               id: item.id,
               who_indication: item.quemIndicou_id,
             }).then(() => {
-              loadOrderIndication.refetch();
+              indicationListMe.refetch();
             });
           });
           break;
@@ -258,7 +263,7 @@ export function Inicio() {
             id: item.id,
             who_indication: item.quemIndicou_id,
           }).then(() => {
-            loadOrderIndication.refetch();
+            indicationListMe.refetch();
           });
 
           break;
@@ -273,10 +278,10 @@ export function Inicio() {
   const deleteIndication = React.useCallback(
     async (id: string) => {
       deleteIndication(id).then(() => {
-        loadOrderIndication.refetch();
+        indicationListMe.refetch();
       });
     },
-    [loadOrderIndication],
+    [indicationListMe],
   );
 
   const rank = indRank.data as ISelfPonts;

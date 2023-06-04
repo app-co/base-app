@@ -180,6 +180,40 @@ export function Classificacao({ item }: IProps) {
               <Title>{item?.b2b?.rank}</Title>
             </BoxPosition>
           </View>
+
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              marginBottom: 8,
+            }}
+          >
+            <BoxContainer>
+              <Title>Convidados</Title>
+              <Title>{item?.b2b?.pontos}pts</Title>
+            </BoxContainer>
+
+            <BoxPosition>
+              <Title>{item?.b2b?.rank}</Title>
+            </BoxPosition>
+          </View>
+
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              marginBottom: 8,
+            }}
+          >
+            <BoxContainer>
+              <Title>Donativos</Title>
+              <Title>{item?.b2b?.pontos}pts</Title>
+            </BoxContainer>
+
+            <BoxPosition>
+              <Title>{item?.b2b?.rank}</Title>
+            </BoxPosition>
+          </View>
         </BoxEventos>
       )}
     </Container>

@@ -12,7 +12,7 @@ module.exports = function (plop) {
         type: 'list',
         name: 'tipoAcao',
         message: 'Qual tipo de ação você quer criar?',
-        choices: ['cmp-app', 'full-app', 'page-app', 'excluir'],
+        choices: ['cmp-app', 'full-app', 'page-app', 'excluir', 'context'],
       },
     ],
     actions(dados) {
@@ -71,6 +71,20 @@ module.exports = function (plop) {
             type: 'add',
             path: '../src/pages/{{pascalCase name}}/styles.ts',
             templateFile: 'templates/styles.ts.hbs',
+          },
+        ];
+      } else if (dados.tipoAcao === 'context') {
+        actions = [
+          {
+            type: 'add',
+            path: '../src/contexts/{{name}}/context.tsx',
+            templateFile: 'templates/context/context.tsx.hbs',
+          },
+
+          {
+            type: 'add',
+            path: '../src/contexts/{{name}}/index.tsx',
+            templateFile: 'templates/context/index.tsx.hbs',
           },
         ];
       }

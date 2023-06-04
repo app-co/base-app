@@ -5,8 +5,11 @@ import { DeletUser } from '../pages/ADM/DeleteUser';
 import { Inativo } from '../pages/ADM/Inativo';
 import { ListaPresença } from '../pages/ADM/ListaPresensa';
 import { UpdateSenhaUser } from '../pages/ADM/UpdateSenhaUser';
+import { ValidateDanates } from '../pages/ADM/ValidateDanates';
+import { ValidateGuest } from '../pages/ADM/ValidateGuest';
 import { ListPresenca } from '../pages/ADM/ValidatePresenca';
 import { Consumo } from '../pages/Consumo';
+import { Donates } from '../pages/Donates';
 import { FindUser } from '../pages/FindMembro';
 import { Indicacoes } from '../pages/Indicacoes';
 import { Padrinho } from '../pages/Padrinho';
@@ -82,15 +85,23 @@ export const rotas = [
     component: Visitante,
     icon: 'user-plus',
   },
+
+  {
+    focus: theme.colors.focus,
+    color: theme.colors.focus_light_3,
+    name: 'DONATIVOS',
+    component: Donates,
+    icon: 'user-plus',
+  },
 ];
 
 export const rotasAdm = [
-  {
-    color: theme.colors.secundary,
-    name: 'RANKING',
-    component: Ranking,
-    icon: '',
-  },
+  // {
+  //   color: theme.colors.secundary,
+  //   name: 'RANKING',
+  //   component: Ranking,
+  //   icon: '',
+  // },
   {
     color: theme.colors.secundary,
     name: 'CADASTRAR MEMBRO',
@@ -104,10 +115,10 @@ export const rotasAdm = [
     icon: '',
   },
   // {
-  //    color: theme.colors.secundary,
-  //    name: 'ALTERAR SENHA DE UM MEMBRO',
-  //    component: UpdateSenhaUser,
-  //    icon: '',
+  //   color: theme.colors.secundary,
+  //   name: 'ALTERAR SENHA DE UM MEMBRO',
+  //   component: UpdateSenhaUser,
+  //   icon: '',
   // },
   {
     color: theme.colors.secundary,
@@ -115,16 +126,29 @@ export const rotasAdm = [
     component: DeletUser,
     icon: '',
   },
-  {
-    color: theme.colors.secundary,
-    name: 'INATIVAR UM MEMBRO',
-    component: Inativo,
-    icon: '',
-  },
+  // {
+  //   color: theme.colors.secundary,
+  //   name: 'INATIVAR UM MEMBRO',
+  //   component: Inativo,
+  //   icon: '',
+  // },
   {
     color: theme.colors.secundary,
     name: 'LISTA DE PRESENÇA',
     component: ListaPresença,
+    icon: '',
+  },
+
+  {
+    color: theme.colors.secundary,
+    name: 'VALIDAR CONVIDADOS',
+    component: ValidateGuest,
+    icon: '',
+  },
+  {
+    color: theme.colors.secundary,
+    name: 'VALIDAR DONATIVOS',
+    component: ValidateDanates,
     icon: '',
   },
 ];

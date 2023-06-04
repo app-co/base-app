@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Alert, FlatList, View } from 'react-native';
 
 import { Header } from '../../../components/Header';
+import { ListMembro } from '../../../components/ListMembro';
 import { IProfileDto, IUserDtos } from '../../../dtos';
 import { api } from '../../../services/api';
 import { Container, Title } from './styles';
@@ -42,7 +43,7 @@ export function DeletUser() {
                 console.log('err ao deletar usuario', h);
                 Alert.alert('Erro', h.response.data.message);
               })
-              .finally(() => goBack());
+              .finally(() => listAllUser());
           },
         },
 
@@ -66,13 +67,10 @@ export function DeletUser() {
           renderItem={({ item: h }) => (
             <ListMembro
               confirmar="Excluir"
-              avatar={h.profile.avatar}
+              avatar={h.profile.avatarUrl}
               nome={h.nome}
               pres={() => {
                 handleDelete(h.membro);
-              }}
-              descartar={() => {
-                goBack();
               }}
             />
           )}

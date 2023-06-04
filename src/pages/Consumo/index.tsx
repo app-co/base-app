@@ -1,28 +1,59 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable no-unused-expressions */
 /* eslint-disable array-callback-return */
 /* eslint-disable consistent-return */
 /* eslint-disable camelcase */
 /* eslint-disable import/prefer-default-export */
-import { format, getMonth, getYear } from 'date-fns';
+import {
+  Feather,
+  MaterialCommunityIcons,
+  MaterialIcons,
+} from '@expo/vector-icons';
+import {
+  addDays,
+  addMonths,
+  format,
+  getDate,
+  getDay,
+  getMonth,
+  getYear,
+  subDays,
+  subMonths,
+} from 'date-fns';
+import { Box, Center, HStack } from 'native-base';
 import React, { useContext, useState } from 'react';
-import { FlatList, ScrollView, TextInput, View } from 'react-native';
+import {
+  FlatList,
+  ScrollView,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 import { colecao } from '../../collection';
 import { Header } from '../../components/Header';
 import { ListConsumo } from '../../components/ListConsumo';
-import { ITransaction, IUserDto } from '../../dtos';
-import { api } from '../../services/api';
+import { useB2b } from '../../contexts/b2b';
+import { useDonate } from '../../contexts/donate';
+import { useIndication } from '../../contexts/indication';
+import { useInvit } from '../../contexts/invit';
+import { usePadrinho } from '../../contexts/padrinho';
+import { usePresenca } from '../../contexts/presenca';
+import { useTransaction } from '../../contexts/transaction';
 import {
-  BoxFiltros,
-  BoxFiltroTouch,
-  BoxTotal,
-  BoxTypeTransaction,
-  BoxTypeTransactionTouch,
-  Container,
-  Text,
-  TextFiltro,
-  TextTypeTransaction,
-} from './styles';
+  IB2b,
+  IDonate,
+  IGuest,
+  IIndicationDto,
+  IPadrinho,
+  IPresencaDto,
+  ITransaction,
+  IUserDto,
+} from '../../dtos';
+import theme from '../../global/styles/theme';
+import { useAuth } from '../../hooks/useAuth';
+import { api } from '../../services/api';
+import * as S from './styles';
 
 export interface PropTransactions {
   id: string;
@@ -41,52 +72,99 @@ interface IQntGeral {
   user_id: string;
 }
 
-interface IIndication {
-  id: string;
-  posicao: string;
-  qntPosicao: number;
-}
-
 type Presença = {
   nome: string;
   data: string;
   status: string;
 };
 
+type TType =
+  | 'entrada'
+  | 'saida'
+  | 'presenca'
+  | 'padrinho'
+  | 'b2b'
+  | 'guest'
+  | 'donate'
+  | 'indication';
+
+const types = [
+  { type: 'entrada', name: 'Entrada', id: '1' },
+  { type: 'saida', name: 'Saida', id: '2' },
+  { type: 'indication', name: 'Indicações', id: '8' },
+  { type: 'presenca', name: 'Presença', id: '3' },
+  { type: 'b2b', name: 'B2B', id: '5' },
+  { type: 'guest', name: 'Convidados', id: '6' },
+  { type: 'donate', name: 'Donativos', id: '7' },
+  { type: 'padrinho', name: 'Padrinho', id: '4' },
+];
+
 export function Consumo() {
   const [transactionP, setTransactionP] = useState<ITransaction[]>([]);
   const [transactionC, setTransactionC] = useState<ITransaction[]>([]);
-  const [type, setType] = useState('entrada');
-  const [filtro, setFiltro] = useState('mes');
+  const [type, setType] = useState<TType>('entrada');
+
+  const [date, setDate] = React.useState(new Date());
+
+  const { transactionListByPrestador, transactionListByClient } =
+    useTransaction();
+
+  const { user } = useAuth();
+  const { indicationListMe } = useIndication();
+  const { presencaListAll } = usePresenca();
+  const { b2bListMe } = useB2b();
+  const { invitListAll } = useInvit();
+  const { donateListAll } = useDonate();
+  const { padrinhoListMe } = usePadrinho();
+
+  const handlePlus = React.useCallback(async () => {
+    const dt = addDays(date, 1);
+
+    setDate(dt);
+  }, [date]);
+
+  const handleMinus = React.useCallback(async () => {
+    const dt = subDays(date, 1);
+
+    setDate(dt);
+  }, [date]);
 
   //* *..........................................................................
 
   const listTransaction = React.useCallback(async () => {
     const vp = 0;
     const vl = 0;
+    const prestador = (transactionListByPrestador.data as ITransaction[]) || [];
+    const client = (transactionListByClient.data as ITransaction[]) || [];
     try {
-      await api.get('transaction/list-by-prestador').then(h => {
-        const rs = h.data as ITransaction[];
-        const ft = rs.map(p => {
+      const ft = prestador
+        .map(p => {
           const { valor } = p;
 
           const valorFormated = valor.toLocaleString('pt-BR', {
             style: 'currency',
             currency: 'BRL',
           });
+
           return {
             ...p,
-            date: format(new Date(p.created_at), 'dd-MM-yyyy'),
+            date: format(new Date(p.created_at!), 'dd-MM-yyyy'),
             valorFormated,
             valor,
           };
-        });
-        setTransactionP(ft);
-      });
+        })
+        .filter(h => {
+          const rsDate = format(new Date(h.created_at!), 'dd/MM/yy');
+          const currencydate = format(date, 'dd/MM/yy');
 
-      await api.get('transaction/list-by-consumidor').then(h => {
-        const rs = h.data as ITransaction[];
-        const ft = rs.map(p => {
+          if (rsDate === currencydate) {
+            return h;
+          }
+        });
+      setTransactionP(ft);
+
+      const rsClient = client
+        .map(p => {
           const { valor } = p;
           const valorFormated = valor.toLocaleString('pt-BR', {
             style: 'currency',
@@ -94,83 +172,51 @@ export function Consumo() {
           });
           return {
             ...p,
-            date: format(new Date(p.created_at), 'dd-MM-yyyy'),
+            date: format(new Date(p.created_at!), 'dd-MM-yyyy'),
             valorFormated,
             valor,
           };
+        })
+        .filter(h => {
+          const rsDate = format(new Date(h.created_at!), 'dd/MM/yy');
+          const currencydate = format(date, 'dd/MM/yy');
+
+          if (rsDate === currencydate) {
+            return h;
+          }
         });
-        setTransactionC(ft);
-      });
+      setTransactionC(rsClient);
     } catch (err) {
-      console.log(err);
+      console.log(err.response);
     }
-  }, []);
+  }, [date, transactionListByClient.data, transactionListByPrestador.data]);
 
   React.useEffect(() => {
     listTransaction();
   }, [listTransaction]);
 
+  const currencyDateFormated = format(date, 'dd/MM/yy');
+
   const extrato = React.useMemo(() => {
-    const month = new Date(Date.now()).getMonth() + 1;
-    const year = new Date(Date.now()).getFullYear();
-    const day = new Date(Date.now()).getDate();
+    const prestador = transactionP;
 
-    const prestador = transactionP.filter(h => {
-      const [dia, mes, ano, hora, menutos] = h.date.split('-').map(Number);
+    const consumidor = transactionC;
 
-      if (filtro === 'mes' && month === mes) {
-        return {
-          ...h,
-        };
-      }
+    let subTotalP = 0;
+    let subTotalC = 0;
 
-      if (filtro === 'ano' && ano === year) {
-        return {
-          ...h,
-        };
-      }
-
-      if (filtro === 'todos') {
-        return {
-          ...h,
-        };
-      }
+    prestador.forEach(h => {
+      subTotalP += h.valor;
     });
 
-    const subTotalP = prestador.reduce((ac, item) => {
-      return ac + item.valor;
-    }, 0);
+    consumidor.forEach(h => {
+      subTotalC += h.valor;
+    });
 
     const totalP = subTotalP.toLocaleString('pt-BR', {
       style: 'currency',
       currency: 'BRL',
     });
-
-    const consumidor = transactionC.filter(h => {
-      const [dia, mes, ano, hora, menutos] = h.date.split('-').map(Number);
-
-      if (filtro === 'mes' && month === mes) {
-        return {
-          ...h,
-        };
-      }
-
-      if (filtro === 'ano' && ano === year) {
-        return {
-          ...h,
-        };
-      }
-
-      if (filtro === 'todos') {
-        return {
-          ...h,
-        };
-      }
-    });
-
-    const subTotalC = consumidor.reduce((ac, item) => {
-      return ac + item.valor;
-    }, 0);
 
     const totalC = subTotalC.toLocaleString('pt-BR', {
       style: 'currency',
@@ -183,182 +229,125 @@ export function Consumo() {
       totalP,
       totalC,
     };
-  }, [filtro, transactionC, transactionP]);
+  }, [transactionC, transactionP]);
 
   //* *..........................................................................
 
-  // todo VENDA ................................................................
-  // const venda = useMemo(() => {
-  //    return response.filter(h => {
-  //       return h.prestador_id === user.id;
-  //    });
-  // }, [response, user.id]);
+  const indicationList = React.useMemo(() => {
+    const indication = (indicationListMe.data as IIndicationDto[]) || [];
+    const ind: IIndicationDto[] = [];
 
-  // const formatedVenda = useMemo(() => {
-  // const res = venda.filter(h => {
-  //    const [dia, mes, ano, hora, menutos] = h.createdAt
-  //       .split('-')
-  //       .map(Number);
-  //    const month = new Date(Date.now()).getMonth() + 1;
-  //    const year = new Date(Date.now()).getFullYear();
-  //    const day = new Date(Date.now()).getDate();
-  //    if (filtro === 'mes' && month === mes) {
-  //       return {
-  //          ...h,
-  //       };
-  //    }
-  //    if (filtro === 'ano' && ano === year) {
-  //       return {
-  //          ...h,
-  //       };
-  //    }
-  //    if (filtro === 'todos') {
-  //       return {
-  //          ...h,
-  //       };
-  //    }
-  // });
-  //    // return res.map(h => {
-  //    //    const [dia, mes, ano, hora, menutos] = h.createdAt
-  //    //       .split('-')
-  //    //       .map(Number);
-  //    //    const total = Number(h.valor).toLocaleString('pt-BR', {
-  //    //       style: 'currency',
-  //    //       currency: 'BRL',
-  //    //    });
-  //    //    return {
-  //    //       ...h,
-  //    //       total,
-  //    //       data: `${dia}/${mes}/${ano}`,
-  //    //    };
-  //    // });
-  // }, []);
+    indication.forEach(h => {
+      const rsDate = format(new Date(h.createdAt!), 'dd/MM/yy');
+      if (rsDate === currencyDateFormated && h.validate === true) {
+        const dt = {
+          ...h,
+          date: rsDate,
+        };
+        ind.push(dt);
+      }
+    });
 
-  // todo ......................................................................
+    return { ind };
+  }, [currencyDateFormated, indicationListMe.data]);
 
-  // const Consumidor = useMemo(() => {
-  //    return response.filter(h => {
-  //       return h.consumidor === user.id;
-  //    });
-  // }, [user]);
+  const presencaList = React.useMemo(() => {
+    const presenca = (presencaListAll.data as IPresencaDto[]) || [];
+    const ind: IIndicationDto[] = [];
 
-  // const formatedConsumidor = useMemo(() => {
-  //    const res = Consumidor.filter(h => {
-  //       const [dia, mes, ano, hora, menutos] = h.createdAt
-  //          .split('-')
-  //          .map(Number);
+    presenca.forEach(h => {
+      const rsDate = format(new Date(h.createdAt!), 'dd/MM/yy');
+      if (
+        rsDate === currencyDateFormated &&
+        h.presenca === true &&
+        h.user_id === user.id
+      ) {
+        const dt = {
+          ...h,
+          date: rsDate,
+        };
+        ind.push(dt);
+      }
+    });
 
-  //       const month = new Date(Date.now()).getMonth() + 1;
-  //       const year = new Date(Date.now()).getFullYear();
-  //       const day = new Date(Date.now()).getDate();
+    return { ind };
+  }, [currencyDateFormated, presencaListAll.data, user.id]);
 
-  //       if (filtro === 'mes' && month === mes) {
-  //          return {
-  //             ...h,
-  //          };
-  //       }
+  const list = React.useMemo(() => {
+    const b2bL = (b2bListMe.data as IB2b[]) || [];
+    const b2b: IB2b[] = [];
 
-  //       if (filtro === 'ano' && ano === year) {
-  //          return {
-  //             ...h,
-  //          };
-  //       }
+    const guest = (invitListAll.data as IGuest[]) || [];
+    const invit: IGuest[] = [];
 
-  //       if (filtro === 'todos') {
-  //          return {
-  //             ...h,
-  //          };
-  //       }
-  //    });
+    const listDonate = (donateListAll.data as IDonate[]) || [];
+    const donate: IDonate[] = [];
 
-  //    return res.map(h => {
-  //       const [dia, mes, ano, hora, menutos] = h.createdAt
-  //          .split('-')
-  //          .map(Number);
-  //       const total = Number(h.valor).toLocaleString('pt-BR', {
-  //          style: 'currency',
-  //          currency: 'BRL',
-  //       });
+    const padrinhoL = (padrinhoListMe.data as IPadrinho[]) || [];
+    const padrinho: IPadrinho[] = [];
 
-  //       return {
-  //          ...h,
-  //          total,
-  //          data: `${dia}/${mes}/${ano}`,
-  //       };
-  //    });
-  // }, [Consumidor, filtro]);
+    b2bL.forEach(h => {
+      const dt = format(new Date(h.createdAt!), 'dd/MM/yy');
 
-  // const handleTotalPrestador = useMemo(() => {
-  //    const tota = formatedVenda.reduce((acc, ind) => {
-  //       return acc + Number(ind.valor);
-  //    }, 0);
-  //    const no = Number(tota).toLocaleString('pt-BR', {
-  //       style: 'currency',
-  //       currency: 'BRL',
-  //    });
+      if (h.validate === true && dt === currencyDateFormated) {
+        const rs = {
+          ...h,
+          date: dt,
+        };
+        b2b.push(rs);
+      }
+    });
 
-  //    return no;
-  // }, [formatedVenda]);
+    guest.forEach(h => {
+      const dt = format(new Date(h.created_at!), 'dd/MM/yy');
 
-  // const handleTotalConsumidor = useMemo(() => {
-  //    const tota = formatedConsumidor.reduce((acc, ind) => {
-  //       return acc + Number(ind.valor);
-  //    }, 0);
+      if (
+        h.approved === true &&
+        dt === currencyDateFormated &&
+        h.fk_user_id === user.id
+      ) {
+        const rs = {
+          ...h,
+          date: dt,
+        };
+        invit.push(rs);
+      }
+    });
 
-  //    return locale(String(tota));
-  // }, [formatedConsumidor]);
+    listDonate.forEach(h => {
+      const dt = format(new Date(h.created_at!), 'dd/MM/yy');
 
-  // const QntGeral = useCallback(async () => {
-  //    fire()
-  //       .collection(colecao.users)
-  //       .get()
-  //       .then(res => {
-  //          const users = res.docs.map(h => {
-  //             return h.data() as IUserDto;
-  //          });
+      if (
+        h.approved === true &&
+        dt === currencyDateFormated &&
+        h.fk_id_user === user.id
+      ) {
+        const rs = {
+          ...h,
+          date: dt,
+        };
+        donate.push(rs);
+      }
+    });
 
-  //          fire()
-  //             .collection(colecao.presenca)
-  //             .get()
-  //             .then(res => {
-  //                const data = res.docs
-  //                   .map(h => h.data())
-  //                   .filter(p => p.user_id === user.id && p.presenca === true);
+    padrinhoL.forEach(h => {
+      const dt = format(new Date(h.created_at!), 'dd/MM/yy');
 
-  //                const resP = res.docs
-  //                   .map(h => h.data())
-  //                   .filter(p => p.user_id === user.id);
+      padrinho.push(h);
+    });
 
-  //                setPresenca(
-  //                   resP.map(h => {
-  //                      return {
-  //                         nome: h.nome,
-  //                         data: format(
-  //                            new Date(h.createdAt),
-  //                            'dd/MM/yyyy - HH:mm',
-  //                         ),
-  //                         status: h.presenca ? 'validado' : 'pendente',
-  //                      };
-  //                   }),
-  //                );
-
-  //                const filter = users.map(h => {
-  //                   const p = data.length + 2;
-  //                   return {
-  //                      qntPadrinho: h.padrinhQuantity,
-  //                      qntPresenca: p,
-  //                      qntIndicacao: h.indicacao,
-  //                      user_id: h.id,
-  //                   };
-  //                });
-
-  //                setQntGeral(filter);
-  //             });
-  //       });
-  // }, [user.id]);
+    return { b2b, invit, donate, padrinho };
+  }, [
+    b2bListMe.data,
+    currencyDateFormated,
+    donateListAll.data,
+    invitListAll.data,
+    padrinhoListMe.data,
+    user.id,
+  ]);
 
   return (
-    <Container>
+    <S.Container>
       <Header />
 
       <View style={{ height: 70 }}>
@@ -369,136 +358,75 @@ export function Consumo() {
           }}
           contentContainerStyle={{
             height: 70,
+            paddingHorizontal: 20,
           }}
         >
-          <BoxTypeTransaction>
-            <BoxTypeTransactionTouch
-              type={type === 'entrada'}
-              onPress={() => setType('entrada')}
-            >
-              <TextTypeTransaction type={type === 'entrada'}>
-                Entrada
-              </TextTypeTransaction>
-            </BoxTypeTransactionTouch>
-
-            <BoxTypeTransactionTouch
-              type={type === 'saida'}
-              onPress={() => setType('saida')}
-            >
-              <TextTypeTransaction type={type === 'saida'}>
-                Saida
-              </TextTypeTransaction>
-            </BoxTypeTransactionTouch>
-
-            <BoxTypeTransactionTouch
-              type={type === 'indicaçao'}
-              onPress={() => setType('indicaçao')}
-            >
-              <TextTypeTransaction type={type === 'indicaçao'}>
-                Indicações
-              </TextTypeTransaction>
-            </BoxTypeTransactionTouch>
-
-            <BoxTypeTransactionTouch
-              type={type === 'presença'}
-              onPress={() => setType('presença')}
-            >
-              <TextTypeTransaction type={type === 'presença'}>
-                Presença
-              </TextTypeTransaction>
-            </BoxTypeTransactionTouch>
-
-            <BoxTypeTransactionTouch
-              type={type === 'padrinho'}
-              onPress={() => setType('padrinho')}
-            >
-              <TextTypeTransaction type={type === 'padrinho'}>
-                Padrinho
-              </TextTypeTransaction>
-            </BoxTypeTransactionTouch>
-
-            <BoxTypeTransactionTouch
-              type={type === 'b2b'}
-              onPress={() => setType('b2b')}
-            >
-              <TextTypeTransaction type={type === 'b2b'}>
-                B2B
-              </TextTypeTransaction>
-            </BoxTypeTransactionTouch>
-          </BoxTypeTransaction>
+          <S.BoxTypeTransaction>
+            {types.map(h => (
+              <S.BoxTypeTransactionTouch
+                type={h.type === type}
+                onPress={() => setType(h.type)}
+                key={h.id}
+              >
+                <S.TextTypeTransaction type={h.type === type}>
+                  {h.name}
+                </S.TextTypeTransaction>
+              </S.BoxTypeTransactionTouch>
+            ))}
+          </S.BoxTypeTransaction>
         </ScrollView>
       </View>
 
-      {type === 'entrada' && (
-        <BoxFiltros>
-          <BoxFiltroTouch
-            filtro={filtro === 'mes'}
-            onPress={() => setFiltro('mes')}
-          >
-            <TextFiltro filtro={filtro === 'mes'}>Mes</TextFiltro>
-          </BoxFiltroTouch>
+      <HStack
+        w="full"
+        mb="4"
+        justifyContent="space-around"
+        alignItems="center"
+        p="2"
+        px="4"
+      >
+        <TouchableOpacity style={{ padding: 3 }} onPress={handleMinus}>
+          <MaterialIcons name="arrow-back-ios" size={34} color="black" />
+        </TouchableOpacity>
 
-          <BoxFiltroTouch
-            filtro={filtro === 'ano'}
-            onPress={() => setFiltro('ano')}
-          >
-            <TextFiltro filtro={filtro === 'ano'}>Ano</TextFiltro>
-          </BoxFiltroTouch>
+        <Center>
+          <S.text>{currencyDateFormated}</S.text>
+          <S.title>{format(date, 'dd')}</S.title>
+          <S.reloaded onPress={() => setDate(new Date())}>
+            <S.text style={{ color: '#fff' }}>AUTALIZAR</S.text>
+          </S.reloaded>
+        </Center>
 
-          <BoxFiltroTouch
-            filtro={filtro === 'todos'}
-            onPress={() => setFiltro('todos')}
-          >
-            <TextFiltro filtro={filtro === 'todos'}>Todos</TextFiltro>
-          </BoxFiltroTouch>
-        </BoxFiltros>
-      )}
+        <TouchableOpacity style={{ padding: 3 }} onPress={handlePlus}>
+          <MaterialIcons name="arrow-forward-ios" size={34} color="black" />
+        </TouchableOpacity>
+      </HStack>
 
-      {type === 'saida' && (
-        <BoxFiltros>
-          <BoxFiltroTouch
-            filtro={filtro === 'mes'}
-            onPress={() => setFiltro('mes')}
-          >
-            <TextFiltro filtro={filtro === 'mes'}>Mes</TextFiltro>
-          </BoxFiltroTouch>
-
-          <BoxFiltroTouch
-            filtro={filtro === 'ano'}
-            onPress={() => setFiltro('ano')}
-          >
-            <TextFiltro filtro={filtro === 'ano'}>Ano</TextFiltro>
-          </BoxFiltroTouch>
-
-          <BoxFiltroTouch
-            filtro={filtro === 'todos'}
-            onPress={() => setFiltro('todos')}
-          >
-            <TextFiltro filtro={filtro === 'todos'}>Todos</TextFiltro>
-          </BoxFiltroTouch>
-        </BoxFiltros>
-      )}
-
-      <BoxTotal>
-        <Text>Total</Text>
-        {type === 'entrada' && <Text>{extrato.totalP}</Text>}
-        {type === 'saida' && <Text>{extrato.totalC}</Text>}
-        {type === 'indicaçao' && <Text>em manutenção</Text>}
-        {type === 'presença' && <Text>em manutenção</Text>}
-        {type === 'padrinho' && <Text>em manutenção</Text>}
-        {type === 'b2b' && <Text>em manutenção</Text>}
-      </BoxTotal>
+      <S.BoxTotal>
+        {type === 'saida' && <S.title style={{ color: '#fff' }}>Total</S.title>}
+        {type === 'entrada' && (
+          <S.title style={{ color: '#fff' }}>Total</S.title>
+        )}
+        {type === 'entrada' && <S.Text>{extrato.totalP}</S.Text>}
+        {type === 'saida' && <S.Text>{extrato.totalC}</S.Text>}
+        {type === 'indication' && <S.Text>Suas inidicações</S.Text>}
+        {type === 'presenca' && <S.Text>Suas presenças</S.Text>}
+        {type === 'padrinho' && <S.Text>Seus afilhiados</S.Text>}
+        {type === 'b2b' && <S.Text>Seus B2Bs</S.Text>}
+        {type === 'donate' && <S.Text>Seus donativos</S.Text>}
+        {type === 'guest' && <S.Text>Seus convidados</S.Text>}
+      </S.BoxTotal>
 
       {type === 'entrada' && (
         <FlatList
           data={transactionP}
-          keyExtractor={h => h.id}
+          keyExtractor={h => String(h.id)}
           renderItem={({ item: h }) => (
             <View>
               <ListConsumo
                 descricao={h.descricao}
-                valor={h.valorFormated}
-                data={h.date}
+                valor={h.valorFormated!}
+                data={h.date!}
               />
             </View>
           )}
@@ -508,44 +436,143 @@ export function Consumo() {
       {type === 'saida' && (
         <FlatList
           data={extrato.consumidor}
-          keyExtractor={h => h.id}
+          keyExtractor={h => String(h.id)}
           renderItem={({ item: h }) => (
             <View>
               <ListConsumo
                 descricao={h.descricao}
-                valor={h.valorFormated}
-                data={h.date}
+                valor={h.valorFormated!}
+                data={h.date!}
               />
             </View>
           )}
         />
       )}
 
-      {/* 
-         {type === 'presença' && (
-            <View style={{ marginTop: 24, flex: 1 }}>
-               <FlatList
-                  contentContainerStyle={{
-                     paddingBottom: 50,
-                  }}
-                  data={presenca}
-                  keyExtractor={h => h.data}
-                  renderItem={({ item: h }) => (
-                     <View
-                        style={{
-                           backgroundColor: theme.colors.focus_light,
-                           marginTop: 16,
-                           padding: 20,
-                        }}
-                     >
-                        <Text style={{ fontSize: 16 }}>{h.nome}</Text>
-                        <Text style={{ fontSize: 16 }}>{h.data}</Text>
-                        <Text style={{ fontSize: 16 }}>{h.status}</Text>
-                     </View>
-                  )}
-               />
+      {type === 'indication' && (
+        <FlatList
+          data={indicationList.ind}
+          keyExtractor={h => String(h.id)}
+          renderItem={({ item: h }) => (
+            <View>
+              <ListConsumo
+                descricao={h.description}
+                valor={h.indicado_name}
+                data={h.date!}
+              />
             </View>
-         )} */}
-    </Container>
+          )}
+        />
+      )}
+
+      {type === 'presenca' && (
+        <FlatList
+          data={presencaList.ind}
+          keyExtractor={h => String(h.id)}
+          renderItem={({ item: h }) => (
+            <Box p={4} bg={theme.colors.focus_light} my="1">
+              <HStack>
+                <S.title style={{ color: '#fff' }}>{h.date}</S.title>
+              </HStack>
+            </Box>
+          )}
+        />
+      )}
+
+      {type === 'b2b' && (
+        <FlatList
+          data={list.b2b}
+          keyExtractor={h => String(h.id)}
+          renderItem={({ item: h }) => (
+            <Box p={4} bg={theme.colors.focus_light} my="1">
+              <HStack
+                w="full"
+                justifyContent="space-between"
+                alignItems="center"
+              >
+                <S.title style={{ color: '#fff' }}>{h.date}</S.title>
+
+                <Box>
+                  <S.title style={{ color: '#fff' }}>
+                    B2B realizado com:
+                  </S.title>
+                  <S.text style={{ color: '#fff' }}>{h.send_name}</S.text>
+                </Box>
+              </HStack>
+            </Box>
+          )}
+        />
+      )}
+
+      {type === 'guest' && (
+        <FlatList
+          data={list.invit}
+          keyExtractor={h => String(h.id)}
+          renderItem={({ item: h }) => (
+            <Box p={4} bg={theme.colors.focus_light} my="1">
+              <HStack
+                w="full"
+                justifyContent="space-between"
+                alignItems="center"
+              >
+                <S.title style={{ color: '#fff' }}>{h.date}</S.title>
+
+                <Box>
+                  <S.title style={{ color: '#fff' }}>Convidado:</S.title>
+                  <S.text style={{ color: '#fff' }}>{h.name_convidado}</S.text>
+                </Box>
+              </HStack>
+            </Box>
+          )}
+        />
+      )}
+
+      {type === 'padrinho' && (
+        <FlatList
+          data={list.padrinho}
+          keyExtractor={h => String(h.id)}
+          renderItem={({ item: h }) => (
+            <Box p={4} bg={theme.colors.focus_light} my="1">
+              <HStack
+                w="full"
+                justifyContent="space-between"
+                alignItems="center"
+              >
+                <Box>
+                  <S.title style={{ color: '#fff' }}>Afilhiado:</S.title>
+                  <S.text style={{ color: '#fff' }}>
+                    {h.apadrinhado_name}
+                  </S.text>
+                </Box>
+              </HStack>
+            </Box>
+          )}
+        />
+      )}
+
+      {type === 'donate' && (
+        <FlatList
+          data={list.donate}
+          keyExtractor={h => String(h.id)}
+          renderItem={({ item: h }) => (
+            <Box p={4} bg={theme.colors.focus_light} my="1">
+              <HStack space={3} w="full" alignItems="center">
+                <S.title style={{ color: '#fff' }}>{h.date}</S.title>
+
+                <Box px="2" flex="1">
+                  <S.title style={{ color: '#fff', alignSelf: 'center' }}>
+                    Itens:
+                  </S.title>
+
+                  <Box>
+                    <S.text style={{ color: '#fff' }}>{h.itens}</S.text>
+                  </Box>
+                </Box>
+              </HStack>
+            </Box>
+          )}
+        />
+      )}
+    </S.Container>
   );
 }

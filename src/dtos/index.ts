@@ -78,6 +78,7 @@ export interface ITransaction {
   descricao: string;
   created_at?: Date;
   date?: string;
+  updated_at?: string;
   valorFormated?: string;
 }
 
@@ -90,6 +91,7 @@ export interface IB2b {
   assunto: string;
   createdAt: Date;
   validate: boolean;
+  updated_at?: string;
   id: string;
 }
 
@@ -103,6 +105,7 @@ export interface IIndicationDto {
   phone_number_client: number;
   description: string;
   validate?: boolean;
+  updated_at?: string;
   createdAt?: Date;
 }
 
@@ -153,4 +156,42 @@ export interface ISelfPonts {
   indication: IPropsPonts;
   b2b: IPropsPonts;
   padrinho: IPropsPonts;
+}
+
+export interface IGlobalPonts {
+  compras: IPropsPonts[];
+  vendas: IPropsPonts[];
+  presenca: IPropsPonts[];
+  indication: IPropsPonts[];
+  b2b: IPropsPonts[];
+  padrinho: IPropsPonts[];
+}
+
+export interface IGuest {
+  id?: string;
+  fk_user_id?: string;
+  name_convidado: string;
+  approved?: boolean;
+  created_at?: Date;
+  updated_at?: Date;
+  user: IUserDtos;
+}
+
+export interface IDonate {
+  id?: string;
+  fk_id_user: string;
+  approved?: boolean;
+  itens: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface IPadrinho {
+  id?: string;
+  user_id: string;
+  apadrinhado_name: string;
+  apadrinhado_id: string;
+  updated_at?: string;
+  created_at?: string;
+  qnt: number;
 }

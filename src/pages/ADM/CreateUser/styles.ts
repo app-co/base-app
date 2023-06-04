@@ -40,7 +40,7 @@ export const BoxInput = styled.View`
 `;
 
 export const Title = styled.Text`
-  font-family: ${fonts.blac};
+  font-family: ${fonts.bold};
   font-size: ${RFValue(14)}px;
   color: ${colors.focus};
 `;

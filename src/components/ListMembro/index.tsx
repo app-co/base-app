@@ -1,4 +1,5 @@
 /* eslint-disable react/require-default-props */
+import { Box } from 'native-base';
 import React from 'react';
 import { View } from 'react-native';
 
@@ -37,12 +38,9 @@ export function ListMembro({
         <TitleData>{data}</TitleData>
 
         <BoxButton>
-          <ButtonPresensa onPress={pres} type="1">
-            <TitleButton>{confirmar}</TitleButton>
-          </ButtonPresensa>
-
-          <ButtonPresensa onPress={descartar} type="2">
-            <TitleButton>Cancelar</TitleButton>
+          <Box />
+          <ButtonPresensa onPress={pres} type="2">
+            <TitleButton>DELETAR</TitleButton>
           </ButtonPresensa>
         </BoxButton>
       </View>

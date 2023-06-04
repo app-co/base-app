@@ -2,6 +2,7 @@ import { RFValue, RFPercentage } from 'react-native-responsive-fontsize';
 import styled from 'styled-components/native';
 
 import theme from '../../global/styles/theme';
+import { _text, _title } from '../../utils/size';
 
 const { colors, fonts } = theme;
 
@@ -18,16 +19,33 @@ export const Container = styled.View`
   background-color: ${theme.colors.primary};
 `;
 
+export const text = styled.Text`
+  font-size: ${_text + 4}px;
+  font-family: ${theme.fonts.medium};
+`;
+
+export const reloaded = styled.TouchableOpacity`
+  padding: 4px 10px;
+  background-color: ${theme.colors.focus_light};
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+`;
+
+export const title = styled.Text`
+  font-size: ${_title}px;
+  font-family: ${theme.fonts.bold};
+`;
+
 export const BoxTotal = styled.View`
   width: 100%;
-  height: ${RFValue(80)}px;
   background-color: ${theme.colors.focus};
   justify-content: center;
-  padding: 0 20px;
+  padding: 10px 20px;
 `;
 
 export const Text = styled.Text`
-  font-size: ${RFValue(20)}px;
+  font-size: ${RFValue(16)}px;
   font-family: ${theme.fonts.bold};
   color: ${theme.colors.text_secundary};
 `;

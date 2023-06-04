@@ -73,6 +73,12 @@ export function FindUser() {
     return us;
   }, [usersL]);
 
+  useFocusEffect(
+    useCallback(() => {
+      users.refetch();
+    }, [users]),
+  );
+
   if (users.isLoading) {
     return (
       <Center>

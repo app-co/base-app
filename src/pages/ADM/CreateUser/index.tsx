@@ -26,9 +26,10 @@ import { Input } from '../../../components/Inputs';
 import { MembroLista } from '../../../components/MembroLista';
 import { ToglleEnquadramento } from '../../../components/ToglleEnquadramento';
 import { ToglleRamo } from '../../../components/ToglleRamo';
-import { IUserDto } from '../../../dtos';
+import { useData } from '../../../contexts/useData';
+import { IUserDtos } from '../../../dtos';
 import theme from '../../../global/styles/theme';
-import { useAuth } from '../../../hooks/AuthContext';
+import { useAuth } from '../../../hooks/useAuth';
 import { api } from '../../../services/api';
 import getValidationErrors from '../../../utils/getValidationsErrors';
 import { Box, BoxAdm, BxPadrinho, Container, Logo, Title } from './styles';
@@ -51,12 +52,12 @@ export function SingUp() {
   const { navigate } = useNavigation();
   const formRef = useRef<FormHandles>(null);
   const { user } = useAuth();
+  const { users } = useData();
+
+  const [loading, setLoading] = React.useState(false);
 
   const [adm, setAdm] = useState(false);
   const [idAdm, setIsAdm] = useState('user');
-  const [er, setErr] = useState();
-  const [response, setResponse] = useState<IUserDto[]>([]);
-  const [loading, setLoading] = useState(false);
 
   // TODO MODAL
   const [modal, setModal] = useState(false);
@@ -136,29 +137,27 @@ export function SingUp() {
     setIsAdm('user');
   }, []);
 
-  const listAllUsers = React.useCallback(async () => {
-    await api
-      .get('user/list-all-user')
-      .then(h => {
-        const us = h.data;
-        setResponse(us);
-      })
-      .catch(h => {
-        console.log('erro ao listar usuarios');
-      });
-  }, []);
+  const listUser = (users.data as IUserDtos[]) || [];
 
   useFocusEffect(
     useCallback(() => {
-      listAllUsers();
+      users.refetch();
     }, []),
   );
+
+  if (users.isLoading) {
+    return (
+      <Center flex="1">
+        <ActivityIndicator />
+      </Center>
+    );
+  }
 
   return (
     <Container>
       <Header />
 
-      <Modalize ref={modalizeRefRamo}>
+      {/* <Modalize ref={modalizeRefRamo}>
         <ToglleRamo selectItem={(item: string) => SelectItemRamo(item)} />
       </Modalize>
 
@@ -166,18 +165,18 @@ export function SingUp() {
         <ToglleEnquadramento
           selectItem={(item: string) => SelectItemEnquadramento(item)}
         />
-      </Modalize>
+      </Modalize> */}
 
       <Modal animationType="fade" visible={modalUser}>
         <View style={{ flex: 1 }}>
           <FlatList
-            data={response}
+            data={listUser}
             keyExtractor={h => h.id}
             renderItem={({ item: h }) => (
               <MembroLista
-                closeModal={() => CloseModalUser(h.user.id, h.user.nome)}
-                nome={h.user.nome}
-                avatar={h.profile.avatar}
+                closeModal={() => CloseModalUser(h.id, h.nome)}
+                nome={h.nome}
+                avatar={h.profile.avatarUrl}
               />
             )}
           />

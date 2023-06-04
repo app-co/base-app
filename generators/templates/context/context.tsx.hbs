@@ -1,0 +1,68 @@
+/* eslint-disable react/jsx-no-constructed-context-values */
+
+import React, { ReactNode, createContext } from 'react';
+import { QueryObserverBaseResult, useQuery } from 'react-query';
+
+import {} from '../../dtos';
+import { api } from '../../services/api';
+
+interface ICreateContextData {
+  {{name}}ListAll: QueryObserverBaseResult
+  {{name}}ListMe: QueryObserverBaseResult
+  
+  {{name}}Create(): Promise<void>
+  {{name}}Update(): Promise<void>
+  {{name}}Delete(id: string): Promise<void>
+}
+
+type TCreation = {
+  children: ReactNode;
+};
+
+export const {{pascalCase name}}ContexProvider = createContext({} as ICreateContextData);
+
+export function {{pascalCase name}}Context({ children }: TCreation) {
+  const {{name}}ListAll = useQuery('{{name}}', async () => {
+    const rs = await api.get('')      
+      .then(h => {
+        return h.data;
+      })
+      .catch(h => console.log(h.response));
+  })
+  
+  const {{name}}ListMe = useQuery('{{name}}', async () => {
+    const rs = await api.get('')
+      .then(h => {
+        return h.data;
+      })
+      .catch(h => console.log(h.response));
+  })
+  
+  const {{name}}Create = React.useCallback(async(item: ) => {
+    await api.post('', {item})
+  }, [])
+  
+  
+  const {{name}}Update = React.useCallback(async(item: ) => {
+    await api.put('', {item})
+  }, [])
+
+  const {{name}}Delete = React.useCallback(async(id: string) => {
+    await api.delete(`/${id}`)
+  }, [])
+
+  return (
+    < {{pascalCase name}}ContexProvider.Provider
+      value=
+
+        {{name}}ListAll,
+        {{name}}ListMe,
+        {{name}}Create,
+        {{name}}Update,
+        {{name}}Delete,
+ 
+    >
+      {children}
+    </ {{pascalCase name}}ContexProvider.Provider>
+  );
+}

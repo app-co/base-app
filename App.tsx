@@ -1,5 +1,7 @@
 /* eslint-disable react/style-prop-object */
 /* eslint-disable camelcase */
+import 'intl';
+import 'intl/locale-data/jsonp/pt-BR';
 
 import {
   Comfortaa_400Regular,
@@ -8,11 +10,8 @@ import {
   useFonts,
 } from '@expo-google-fonts/comfortaa';
 
-import 'intl';
-import 'intl/locale-data/jsonp/pt-BR';
 import 'react-native-gesture-handler';
 
-import { NavigationContainer } from '@react-navigation/native';
 import * as Notifications from 'expo-notifications';
 import { StatusBar } from 'expo-status-bar';
 import * as Updates from 'expo-updates';
@@ -27,12 +26,9 @@ import React, { useRef } from 'react';
 import { ActivityIndicator, AppState, LogBox, Modal, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { ThemeProvider } from 'styled-components/native';
 
 import theme from './src/global/styles/theme';
-import { AppProvider } from './src/hooks';
 import { AuthContextProvider } from './src/hooks/AuthContext';
-import { SingIn } from './src/pages/LogIn';
 import { Route } from './src/routes';
 import { update, version } from './src/utils/updates';
 
@@ -53,10 +49,10 @@ export default function App() {
   //* * UPDATE APLICATION ....................................................
 
   const ChecUpdadeDevice = React.useCallback(async () => {
-    const { isAvailable } = await Updates.checkForUpdateAsync();
-    if (isAvailable) {
-      setModalUpdates(true);
-    }
+    // const { isAvailable } = await Updates.checkForUpdateAsync();
+    // if (isAvailable) {
+    //   setModalUpdates(true);
+    // }
   }, []);
 
   const ReloadDevice = React.useCallback(async () => {
@@ -65,15 +61,14 @@ export default function App() {
   }, []);
 
   React.useEffect(() => {
-    const event = AppState.addEventListener('change', h => {
-      if (h === 'active') {
-        ChecUpdadeDevice();
-      }
-    });
-
-    return () => {
-      event.remove();
-    };
+    // const event = AppState.addEventListener('change', h => {
+    //   if (h === 'active') {
+    //     ChecUpdadeDevice();
+    //   }
+    // });
+    // return () => {
+    //   event.remove();
+    // };
   }, [ChecUpdadeDevice]);
 
   //* * .......................................................................
