@@ -2,7 +2,7 @@
   "expo": {
     "name": "GEB networking",
     "slug": "aplicativogeb",
-    "version": "1.0.0",
+    "version": "3.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -17,13 +17,15 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.app-c.appGeb",
-      "googleServicesFile": "google-ios.plist"
+      "googleServicesFile": "google-ios.plist",
+      "buildNumber": "32"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
+      "versionCode": 32,
       "package": "com.appc.gebtraining",
       "googleServicesFile": "google-android.json"
     },
