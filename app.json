@@ -2,7 +2,7 @@
   "expo": {
     "name": "GEB networking",
     "slug": "aplicativogeb",
-    "version": "3.0.0",
+    "version": "3.0.2",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -18,16 +18,19 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.app-c.appGeb",
       "googleServicesFile": "google-ios.plist",
-      "buildNumber": "32"
+      "buildNumber": "34"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "versionCode": 32,
+      "versionCode": 34,
       "package": "com.appc.gebtraining",
-      "googleServicesFile": "google-android.json"
+      "googleServicesFile": "google-android.json",
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "plugins": [
       "@react-native-firebase/app",
@@ -37,7 +40,6 @@
           "color": "#000000"
         }
       ],
-
       [
         "expo-image-picker",
         {
@@ -52,6 +54,10 @@
       "eas": {
         "projectId": "3f0c01b7-dfb6-4ce3-a5c8-32950dc2f3b1"
       }
+    },
+    "runtimeVersion": "3.0.1",
+    "updates": {
+      "url": "https://u.expo.dev/3f0c01b7-dfb6-4ce3-a5c8-32950dc2f3b1"
     }
   }
 }

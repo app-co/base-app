@@ -4,6 +4,7 @@ import React, { ReactNode, createContext } from 'react';
 import { QueryObserverBaseResult, useQuery } from 'react-query';
 
 import { IIndicationDto } from '../../dtos';
+import { Sucess } from '../../pages/Sucess';
 import { api } from '../../services/api';
 
 interface Props {
@@ -44,11 +45,24 @@ export function Indication({ children }: TCreation) {
   }, []);
 
   const indicationUpdate = React.useCallback(async (item: Props) => {
-    await api.put('indication/validate-indication', { item });
+    await api
+      .put('indication/validate-indication', {
+        indicado_id: item.indicado_id,
+        idication_id: item.indication_id,
+      })
+      .then(() => {
+        indicationListMe.refetch();
+      })
+      .catch(h => console.log('erro'));
   }, []);
 
   const indicationDelete = React.useCallback(async (id: string) => {
-    await api.delete(`indication/${id}`);
+    await api
+      .delete(`/indication/del-indication/${id}`)
+      .catch(h => console.log(h.response))
+      .then(h => {
+        indicationListMe.refetch();
+      });
   }, []);
 
   return (

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable no-unused-expressions */
 /* eslint-disable @typescript-eslint/no-unused-vars */
@@ -46,6 +47,7 @@ import { OrderIndicationComp } from '../../components/OrderIndicationComp';
 import { useB2b } from '../../contexts/b2b';
 import { useIndication } from '../../contexts/indication';
 import { useOrderTransaction } from '../../contexts/orderTransaction';
+import { useToken } from '../../contexts/Token';
 import { useCreation } from '../../contexts/useCreation';
 import { useData } from '../../contexts/useData';
 import { useOrders } from '../../contexts/useOrders';
@@ -59,7 +61,9 @@ import {
 import theme from '../../global/styles/theme';
 import { useAuth } from '../../hooks/useAuth';
 import { api } from '../../services/api';
+import { locale } from '../../utils/LocalStrigMoney';
 import { _currency, _number } from '../../utils/mask';
+import { _subTitle } from '../../utils/size';
 import * as S from './styles';
 
 const wt = Dimensions.get('window').width;
@@ -83,11 +87,11 @@ export function Inicio() {
     aprovedOrderIndication,
   } = useCreation();
 
-  const { b2bListMe } = useB2b();
-  const { orderTransactionListByPrestador } = useOrderTransaction();
-  const { indicationListMe } = useIndication();
+  const [load, setLoad] = React.useState(false);
 
-  console.log(b2bListMe.error, indicationListMe.error, 'ok');
+  const { b2bListMe, b2bUpdate } = useB2b();
+  const { orderTransactionListByPrestador } = useOrderTransaction();
+  const { indicationListMe, indicationDelete } = useIndication();
 
   const [showOrderB2b, setShowOrderB2b] = React.useState(false);
   const [shwTransaction, setShowTransaction] = React.useState(false);
@@ -96,7 +100,7 @@ export function Inicio() {
   const [description, setDescription] = React.useState('');
   const [value, setValue] = React.useState('');
   const [valueType, setValueType] = React.useState<TTypeValue>();
-  const [indexIndication, setIndexIndication] = React.useState(9999);
+  const [indexIndication, setIndexIndication] = React.useState(null);
 
   const [valorGeb, setValorGeb] = React.useState<PropsValorTotal>();
 
@@ -117,7 +121,7 @@ export function Inicio() {
             return h;
           }
         })
-        .filter((h, i) => i !== indexIndication);
+        .filter((h, i) => h.id !== indexIndication);
     }
 
     return { b2b, transaction, indication };
@@ -145,24 +149,30 @@ export function Inicio() {
   }, [orders.b2b.length, orders.transaction.length, orders.indication.length]);
 
   const confirmatioOrderB2b = React.useCallback(
-    async (id: string) => {
-      aprovedB2b(id).then(h => {
+    async (item: IB2b) => {
+      setLoad(true);
+      b2bUpdate(item.id!).then(h => {
         b2bListMe.refetch();
+        setLoad(false);
       });
     },
-    [aprovedB2b, b2bListMe],
+    [b2bListMe, b2bUpdate],
   );
 
   const recuseOrderB2b = React.useCallback(
     async (id: string) => {
-      await deletB2b(id);
-      b2bListMe.refetch();
+      setLoad(true);
+      await deletB2b(id).then(() => {
+        setLoad(false);
+        b2bListMe.refetch();
+      });
     },
     [deletB2b, b2bListMe],
   );
 
   const confirmatioTransaction = React.useCallback(
     async (item: IOrderTransaction) => {
+      setLoad(true);
       const dados = {
         consumidor_name: item.consumidor_id,
         consumidor_id: item.consumidor_id,
@@ -174,6 +184,7 @@ export function Inicio() {
       };
       aprovedOrderTransaction(dados).then(h => {
         orderTransactionListByPrestador.refetch();
+        setLoad(false);
       });
     },
     [aprovedOrderTransaction, orderTransactionListByPrestador],
@@ -181,8 +192,10 @@ export function Inicio() {
 
   const recuseTransactionOrder = React.useCallback(
     async (id: string) => {
+      setLoad(true);
       await deleteOrderTransaction(id);
       orderTransactionListByPrestador.refetch();
+      setLoad(false);
     },
     [deleteOrderTransaction, orderTransactionListByPrestador],
   );
@@ -243,27 +256,32 @@ export function Inicio() {
 
       switch (valueType) {
         case 'handshak':
+          setLoad(true);
+
           createTransaction(dados).then(() => {
             aprovedOrderIndication({
               id: item.id,
               who_indication: item.quemIndicou_id,
             }).then(() => {
               indicationListMe.refetch();
+              setLoad(false);
             });
           });
           break;
 
         case 'not-yeat':
-          setIndexIndication(index);
+          setIndexIndication(item.id!);
 
           break;
 
         case 'not':
-          aprovedOrderIndication({
-            id: item.id,
-            who_indication: item.quemIndicou_id,
-          }).then(() => {
-            indicationListMe.refetch();
+          setLoad(true);
+          indicationDelete(item.id!).then(() => {
+            setLoad(false);
+            aprovedOrderIndication({
+              id: item.id,
+              who_indication: item.quemIndicou_id,
+            });
           });
 
           break;
@@ -272,16 +290,26 @@ export function Inicio() {
           break;
       }
     },
-    [],
+    [
+      aprovedOrderIndication,
+      createTransaction,
+      description,
+      indicationDelete,
+      indicationListMe,
+      user.id,
+      user.nome,
+      value,
+      valueType,
+    ],
   );
 
-  const deleteIndication = React.useCallback(
+  const handledeleteIndication = React.useCallback(
     async (id: string) => {
-      deleteIndication(id).then(() => {
+      indicationDelete(id).then(() => {
         indicationListMe.refetch();
       });
     },
-    [indicationListMe],
+    [indicationDelete, indicationListMe],
   );
 
   const rank = indRank.data as ISelfPonts;
@@ -299,18 +327,30 @@ export function Inicio() {
       const apdr = rank.padrinho.pontos;
 
       totalPonts = b2b + indi + vend + comp + pres + apdr;
-      totalValorVenda = _currency(String(rank.vendas.valor));
+      totalValorVenda = locale(String(rank.vendas.valor));
     }
 
     return { totalPonts, totalValorVenda };
-  }, [rank]);
+  }, [indRank.isLoading, rank]);
 
   useFocusEffect(
     useCallback(() => {
-      setIndexIndication(999);
+      // setIndexIndication(null);
       openModalOrders();
       loadVendas();
-    }, [openModalOrders]),
+      indRank.refetch();
+
+      b2bListMe.refetch();
+      indicationListMe.refetch();
+      orderTransactionListByPrestador.refetch();
+      // logOut();
+    }, [loadVendas, openModalOrders]),
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      setIndexIndication(null);
+    }, []),
   );
 
   return (
@@ -326,16 +366,17 @@ export function Inicio() {
       />
       {/* MODAL B2B */}
       <Modal visible={showOrderB2b} animationType="fade" transparent>
-        <ModalComp closed={() => setShowOrderB2b(false)} title="">
+        <ModalComp closed={() => setShowOrderB2b(false)} title="B2B">
           <FlatList
             data={orders.b2b}
-            keyExtractor={h => h.id}
+            keyExtractor={h => String(h.id)}
             renderItem={({ item: h }) => (
               <ListB2bOrder
+                load={load}
                 name={h.send_name}
                 description={h.assunto}
-                confirmation={() => confirmatioOrderB2b(h.id)}
-                recuse={() => recuseOrderB2b(h.id)}
+                confirmation={() => confirmatioOrderB2b(h)}
+                recuse={() => recuseOrderB2b(h.id!)}
               />
             )}
           />
@@ -343,12 +384,13 @@ export function Inicio() {
       </Modal>
 
       <Modal visible={shwTransaction} animationType="fade" transparent>
-        <ModalComp closed={() => setShowTransaction(false)} title="">
+        <ModalComp closed={() => setShowTransaction(false)} title="Consumo">
           <FlatList
             data={orders.transaction}
             keyExtractor={h => h.id}
             renderItem={({ item: h }) => (
               <ListTransactionOrder
+                load={load}
                 item={h}
                 confirmation={() => confirmatioTransaction(h)}
                 recuse={() => recuseTransactionOrder(h.id)}
@@ -362,12 +404,13 @@ export function Inicio() {
         <ModalComp closed={() => setShowIndication(false)} title="">
           <FlatList
             data={orders.indication}
-            keyExtractor={h => h.id}
+            keyExtractor={h => h.id!}
             renderItem={({ item: h, index }) => (
               <OrderIndicationComp
+                load={load}
                 valueType={h => setValueType(h)}
                 confirmation={() => handleIndication(h, index)}
-                reject={() => deleteIndication(h.id)}
+                reject={() => deleteIndication(h.id!)}
                 item={h}
                 form={
                   <Form>
@@ -402,28 +445,38 @@ export function Inicio() {
         </ModalComp>
       </Modal>
 
-      <HStack mt="8">
-        <Center px="5">
-          <Avatar size="xl" source={{ uri: user?.profile.avatar }} />
-        </Center>
+      <Center>
+        <S.text style={{ fontFamily: 'mediun', fontSize: _subTitle }}>
+          {user.nome}
+        </S.text>
+        <S.text>{user.profile.workName}</S.text>
+      </Center>
 
-        <Box justifyContent="center">
-          <HStack>
-            <Box>
-              <S.text>Vendas este ano:</S.text>
-              <S.text>Meus pontos:</S.text>
-            </Box>
+      <HStack space={10} justifyContent="center" my="4" alignItems="center">
+        <Avatar size="xl" source={{ uri: user?.profile.avatar }} />
 
-            <Box ml="1">
-              <S.text>{calculo.totalValorVenda}</S.text>
-              <S.text>{calculo.totalPonts}</S.text>
-            </Box>
-          </HStack>
+        <Box w="1" bg="black" h="full" />
+
+        <Box alignItems="flex-end">
+          <S.text>Vendas este ano:</S.text>
+          <S.text style={{ fontSize: _subTitle, fontFamily: 'medium' }}>
+            {calculo.totalValorVenda}
+          </S.text>
+
+          <S.text>Meus pontos:</S.text>
+          <S.text style={{ fontSize: _subTitle, fontFamily: 'medium' }}>
+            {calculo.totalPonts}
+          </S.text>
         </Box>
       </HStack>
+
       <Center>
-        <S.text style={{ marginTop: 15 }}>Acumulados do G.E.B:</S.text>
-        <S.text>{valorGeb?.priceGeb}</S.text>
+        <HStack space={2} alignItems="center">
+          <S.text style={{ fontSize: _subTitle }}>Acumulados do GEB:</S.text>
+          <S.text style={{ fontSize: _subTitle, fontFamily: 'medium' }}>
+            {valorGeb?.priceGeb}
+          </S.text>
+        </HStack>
       </Center>
 
       <S.Line />

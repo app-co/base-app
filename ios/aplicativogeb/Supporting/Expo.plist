@@ -8,9 +8,9 @@
     <true/>
     <key>EXUpdatesLaunchWaitMs</key>
     <integer>0</integer>
-    <key>EXUpdatesSDKVersion</key>
-    <string>48.0.0</string>
+    <key>EXUpdatesRuntimeVersion</key>
+    <string>3.0.1</string>
     <key>EXUpdatesURL</key>
-    <string>https://exp.host/@app-c/aplicativogeb</string>
+    <string>https://u.expo.dev/3f0c01b7-dfb6-4ce3-a5c8-32950dc2f3b1</string>
   </dict>
 </plist>

@@ -1,7 +1,5 @@
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
-import { useState, useEffect, useRef } from 'react';
-import { Text, View, Button, Platform } from 'react-native';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({

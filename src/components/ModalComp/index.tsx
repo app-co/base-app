@@ -21,7 +21,7 @@ export function ModalComp({ title, children, closed }: Prps) {
           alignItems="center"
           justifyContent="space-between"
           borderRadius="3"
-          px="4"
+          px="2"
         >
           <S.title>{title}</S.title>
           <TouchableOpacity onPress={closed} style={{ padding: 4 }}>

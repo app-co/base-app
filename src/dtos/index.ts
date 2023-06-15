@@ -38,7 +38,7 @@ export interface IProfileDto {
   face: string;
   whatsApp: string;
   logo: string;
-  avatarUrl: string;
+  avatar: string;
 }
 
 export interface IRegion {
@@ -87,12 +87,12 @@ export interface IB2b {
   send_name: string;
   recevid_name: string;
   recevid_id: string;
-  appointment: string;
+  appointment: Date | string;
   assunto: string;
-  createdAt: Date;
+  createdAt?: Date;
   validate: boolean;
   updated_at?: string;
-  id: string;
+  id?: string;
 }
 
 export interface IIndicationDto {
@@ -156,6 +156,8 @@ export interface ISelfPonts {
   indication: IPropsPonts;
   b2b: IPropsPonts;
   padrinho: IPropsPonts;
+  donates: IPropsPonts;
+  convidado: IPropsPonts;
 }
 
 export interface IGlobalPonts {
@@ -165,6 +167,8 @@ export interface IGlobalPonts {
   indication: IPropsPonts[];
   b2b: IPropsPonts[];
   padrinho: IPropsPonts[];
+  donates: IPropsPonts[];
+  convidado: IPropsPonts[];
 }
 
 export interface IGuest {

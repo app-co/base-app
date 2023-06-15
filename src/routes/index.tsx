@@ -14,6 +14,7 @@ import { OrderTransaction } from '../contexts/orderTransaction/context';
 import { PadrinhoContext } from '../contexts/padrinho/context';
 import { Pontos } from '../contexts/pontos/context';
 import { PresencaContext } from '../contexts/presenca/context';
+import { TokenContext } from '../contexts/Token/context';
 import { Transaction } from '../contexts/transaction/context';
 import { useAuth } from '../hooks/useAuth';
 import { SingIn } from '../pages/LogIn';
@@ -41,7 +42,9 @@ export function Route() {
                           <Transaction>
                             <PresencaContext>
                               <PadrinhoContext>
-                                <DrawerApp />
+                                <TokenContext>
+                                  <DrawerApp />
+                                </TokenContext>
                               </PadrinhoContext>
                             </PresencaContext>
                           </Transaction>

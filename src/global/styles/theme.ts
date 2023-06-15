@@ -20,8 +20,9 @@ export default {
   },
 
   fonts: {
-    regular: 'Comfortaa_400Regular',
-    medium: 'Comfortaa_500Medium',
-    bold: 'Comfortaa_700Bold',
+    regular: 'regular',
+    medium: 'medium',
+    bold: 'bold',
+    Regular: 'regular',
   },
 };

@@ -25,20 +25,20 @@ export const Container = styled.View`
 `;
 
 export const title = styled.Text`
-  font-family: ${fonts.regular};
+  font-family: ${fonts.Regular};
   font-size: ${_title}px;
   /* color: ${colors.text_secundary}; */
 `;
 
 export const subTitle = styled.Text`
-  font-family: ${fonts.regular};
+  font-family: ${fonts.medium};
   font-size: ${_subTitle}px;
   /* color: ${colors.text_secundary}; */
 `;
 
 export const text = styled.Text`
-  font-family: ${fonts.regular};
-  font-size: ${_text}px;
+  font-family: ${fonts.Regular};
+  font-size: ${_text + 5}px;
   /* color: ${colors.text_secundary}; */
 `;
 
@@ -72,7 +72,7 @@ export const BoxIco = styled.View`
 
 export const TitleName = styled.Text`
   /* margin-top: 10px; */
-  font-family: ${fonts.regular};
+  font-family: ${fonts.Regular};
   font-size: ${RFValue(20)}px;
   align-self: center;
   color: ${theme.colors.text};
@@ -100,19 +100,19 @@ export const BoxPrice = styled.View.attrs({
   padding: 2px;
 `;
 export const TitlePrice = styled.Text`
-  font-family: ${fonts.regular};
+  font-family: ${fonts.Regular};
   font-size: ${RFValue(16)}px;
   color: ${theme.colors.text_secundary};
 `;
 
 export const TitleP = styled.Text`
-  font-family: ${fonts.regular};
+  font-family: ${fonts.Regular};
   font-size: ${RFValue(12)}px;
   color: ${theme.colors.text_secundary};
 `;
 
 export const ComprasText = styled.Text`
-  font-family: ${fonts.regular};
+  font-family: ${fonts.Regular};
   font-size: ${RFValue(14)}px;
   color: ${theme.colors.text};
   top: ${RFValue(15)}px;

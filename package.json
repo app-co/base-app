@@ -9,6 +9,7 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@expo-google-fonts/barlow-condensed": "0.2.3",
     "@expo-google-fonts/comfortaa": "0.2.3",
     "@expo-google-fonts/mitr": "^0.2.3",
     "@expo-google-fonts/open-sans-condensed": "0.2.2",

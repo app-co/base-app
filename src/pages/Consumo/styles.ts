@@ -21,7 +21,7 @@ export const Container = styled.View`
 
 export const text = styled.Text`
   font-size: ${_text + 4}px;
-  font-family: ${theme.fonts.medium};
+  font-family: ${theme.fonts.Regular};
 `;
 
 export const reloaded = styled.TouchableOpacity`
@@ -34,7 +34,7 @@ export const reloaded = styled.TouchableOpacity`
 
 export const title = styled.Text`
   font-size: ${_title}px;
-  font-family: ${theme.fonts.bold};
+  font-family: ${theme.fonts.Regular};
 `;
 
 export const BoxTotal = styled.View`
@@ -46,7 +46,7 @@ export const BoxTotal = styled.View`
 
 export const Text = styled.Text`
   font-size: ${RFValue(16)}px;
-  font-family: ${theme.fonts.bold};
+  font-family: ${theme.fonts.Regular};
   color: ${theme.colors.text_secundary};
 `;
 
@@ -60,7 +60,7 @@ export const BoxFiltros = styled.View`
 
 export const TextFiltro = styled.Text<PropsFiltro>`
   font-size: ${RFValue(14)}px;
-  font-family: ${fonts.regular};
+  font-family: ${fonts.Regular};
   color: ${({ filtro }) => (filtro ? colors.text_secundary : colors.text)};
 `;
 

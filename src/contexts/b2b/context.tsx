@@ -37,11 +37,22 @@ export function B2b({ children }: TCreation) {
   });
 
   const b2bCreate = React.useCallback(async (item: IB2b) => {
-    await api.post('b2b/create-b2b', item);
+    await api.post('b2b/create-b2b', {
+      send_id: item.send_id,
+      send_name: item.send_name,
+      recevid_id: item.recevid_id,
+      recevid_name: item.recevid_name,
+      appointment: item.appointment,
+      validate: item.validate,
+      assunto: item.assunto,
+    });
   }, []);
 
   const b2bUpdate = React.useCallback(async (id: string) => {
-    await api.put('b2b/validate-b2b', { id });
+    await api.put('b2b/validate-b2b', { id }).then(h => {
+      b2bListMe.refetch();
+      console.log(h.data);
+    });
   }, []);
 
   const b2bDelete = React.useCallback(async (id: string) => {

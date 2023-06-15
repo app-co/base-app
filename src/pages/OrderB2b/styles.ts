@@ -91,7 +91,7 @@ export const Avatar = styled.Image`
   width: ${RFValue(75)}px;
   border-radius: ${RFValue(35)}px;
   height: ${RFValue(75)}px;
-  top: 20px;
+  top: 10px;
 `;
 
 export const ImageOfice = styled.Image`

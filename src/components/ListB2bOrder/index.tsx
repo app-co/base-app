@@ -1,5 +1,6 @@
 import { Avatar, Box, Center, HStack } from 'native-base';
 import React from 'react';
+import { ActivityIndicator } from 'react-native';
 
 import * as S from './styles';
 
@@ -9,6 +10,7 @@ interface IProps {
 
   confirmation: () => void;
   recuse: () => void;
+  load: boolean;
 }
 
 export function ListB2bOrder({
@@ -16,6 +18,7 @@ export function ListB2bOrder({
   description,
   confirmation,
   recuse,
+  load = false,
 }: IProps) {
   return (
     <S.Container>
@@ -32,11 +35,19 @@ export function ListB2bOrder({
 
       <Center mt="4">
         <HStack space={8}>
-          <S.recusar onPress={recuse}>
-            <S.buttonText>RECUSAR</S.buttonText>
+          <S.recusar disabled={load} onPress={recuse}>
+            {load ? (
+              <ActivityIndicator />
+            ) : (
+              <S.buttonText>RECUSAR</S.buttonText>
+            )}
           </S.recusar>
-          <S.confirm onPress={confirmation}>
-            <S.buttonText>CONFIRMAR</S.buttonText>
+          <S.confirm disabled={load} onPress={confirmation}>
+            {load ? (
+              <ActivityIndicator />
+            ) : (
+              <S.buttonText>CONFIRMAR</S.buttonText>
+            )}
           </S.confirm>
         </HStack>
       </Center>

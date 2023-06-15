@@ -1,19 +1,26 @@
 import { Avatar, Box, Center, HStack } from 'native-base';
 import React from 'react';
+import { ActivityIndicator } from 'react-native';
 
-import { currency } from '../../utils/mask';
 import { IOrderTransaction } from '../../dtos';
+import { _currency } from '../../utils/mask';
 import * as S from './styles';
 
 interface IProps {
   item: IOrderTransaction;
+  load: boolean;
 
   confirmation: () => void;
   recuse: () => void;
 }
 
-export function ListTransactionOrder({ item, confirmation, recuse }: IProps) {
-  const valor = currency(String(item.valor));
+export function ListTransactionOrder({
+  item,
+  load = false,
+  confirmation,
+  recuse,
+}: IProps) {
+  const valor = _currency(String(item?.valor));
 
   return (
     <S.Container>
@@ -31,11 +38,20 @@ export function ListTransactionOrder({ item, confirmation, recuse }: IProps) {
 
       <Center mt="4">
         <HStack space={8}>
-          <S.recusar onPress={recuse}>
-            <S.buttonText>RECUSAR</S.buttonText>
+          <S.recusar disabled={load} onPress={recuse}>
+            {load ? (
+              <ActivityIndicator />
+            ) : (
+              <S.buttonText>RECUSAR</S.buttonText>
+            )}
           </S.recusar>
-          <S.confirm onPress={confirmation}>
-            <S.buttonText>CONFIRMAR</S.buttonText>
+
+          <S.confirm disabled={load} onPress={confirmation}>
+            {load ? (
+              <ActivityIndicator />
+            ) : (
+              <S.buttonText>CONFIRMAR</S.buttonText>
+            )}
           </S.confirm>
         </HStack>
       </Center>

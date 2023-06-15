@@ -10,7 +10,7 @@ export const Container = styled.View`
 `;
 
 export const Title = styled.Text`
-  font-family: ${fonts.bold};
+  font-family: ${fonts.medium};
   font-size: ${RFValue(16)}px;
   color: ${colors.text_secundary};
 `;
@@ -25,7 +25,6 @@ export const BoxAvatar = styled.Image`
 
 export const BoxEventos = styled.View`
   padding: 0 10px;
-  margin-top: ${RFValue(5)}px;
 `;
 
 export const BoxContainer = styled.View`

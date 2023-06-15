@@ -4,11 +4,11 @@ import 'intl';
 import 'intl/locale-data/jsonp/pt-BR';
 
 import {
-  Comfortaa_400Regular,
-  Comfortaa_500Medium,
-  Comfortaa_700Bold,
+  BarlowCondensed_400Regular as regular,
+  BarlowCondensed_500Medium as medium,
+  BarlowCondensed_700Bold as bold,
   useFonts,
-} from '@expo-google-fonts/comfortaa';
+} from '@expo-google-fonts/barlow-condensed';
 
 import 'react-native-gesture-handler';
 
@@ -49,10 +49,10 @@ export default function App() {
   //* * UPDATE APLICATION ....................................................
 
   const ChecUpdadeDevice = React.useCallback(async () => {
-    // const { isAvailable } = await Updates.checkForUpdateAsync();
-    // if (isAvailable) {
-    //   setModalUpdates(true);
-    // }
+    const { isAvailable } = await Updates.checkForUpdateAsync();
+    if (isAvailable) {
+      setModalUpdates(true);
+    }
   }, []);
 
   const ReloadDevice = React.useCallback(async () => {
@@ -61,22 +61,22 @@ export default function App() {
   }, []);
 
   React.useEffect(() => {
-    // const event = AppState.addEventListener('change', h => {
-    //   if (h === 'active') {
-    //     ChecUpdadeDevice();
-    //   }
-    // });
-    // return () => {
-    //   event.remove();
-    // };
+    const event = AppState.addEventListener('change', h => {
+      if (h === 'active') {
+        ChecUpdadeDevice();
+      }
+    });
+    return () => {
+      event.remove();
+    };
   }, [ChecUpdadeDevice]);
 
   //* * .......................................................................
 
   const [loaded] = useFonts({
-    Comfortaa_400Regular,
-    Comfortaa_500Medium,
-    Comfortaa_700Bold,
+    medium,
+    bold,
+    regular,
   });
 
   if (!loaded) {

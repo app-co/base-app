@@ -1,6 +1,7 @@
 import { format } from 'date-fns';
 import { Box, Center, Radio } from 'native-base';
 import React, { ReactNode } from 'react';
+import { ActivityIndicator } from 'react-native';
 import { RFValue } from 'react-native-responsive-fontsize';
 
 import { IIndicationDto } from '../../dtos';
@@ -14,6 +15,7 @@ interface IProps {
   confirmation: () => void;
   valueType: (item: string) => void;
   form: ReactNode;
+  load: boolean;
 }
 
 export function OrderIndicationComp({
@@ -22,6 +24,7 @@ export function OrderIndicationComp({
   valueType,
   confirmation,
   form,
+  load,
 }: IProps) {
   const [value, setValue] = React.useState('');
 
@@ -107,12 +110,12 @@ export function OrderIndicationComp({
       {value === 'handshak' && <Box>{form}</Box>}
 
       <S.flexButton>
-        <S.buttonRe onPress={reject}>
-          <S.text>REGEITAR</S.text>
+        <S.buttonRe disabled={load} onPress={reject}>
+          {load ? <ActivityIndicator /> : <S.text>REGEITAR</S.text>}
         </S.buttonRe>
 
-        <S.buttonOk onPress={confirmation}>
-          <S.text>CONFIRMAR</S.text>
+        <S.buttonOk disabled={load} onPress={confirmation}>
+          {load ? <ActivityIndicator /> : <S.text>CONFIRMAR</S.text>}
         </S.buttonOk>
       </S.flexButton>
     </S.Container>

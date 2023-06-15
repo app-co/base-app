@@ -5,12 +5,15 @@ import { AntDesign, Feather } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { TextArea } from 'native-base';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, ScrollView, Text, View } from 'react-native';
 import { RFValue } from 'react-native-responsive-fontsize';
 
 import { Header } from '../../components/Header';
+import { useB2b } from '../../contexts/b2b';
+import { useToken } from '../../contexts/Token';
 import { IUserDtos } from '../../dtos';
 import theme from '../../global/styles/theme';
+import { useAuth } from '../../hooks/useAuth';
 import { api } from '../../services/api';
 import * as S from './styles';
 
@@ -19,21 +22,23 @@ interface IRoute {
 }
 
 export function OrderB2b() {
-  const { navigate, reset } = useNavigation();
-  const moneyRef = useRef(null);
+  const { navigate, reset, goBack } = useNavigation();
+  const { b2bCreate } = useB2b();
+  const { sendMessage } = useToken();
   const { user } = useAuth();
   const route = useRoute();
   const { prestador } = route.params as IRoute;
 
-  const [value, setValue] = useState('');
   const [description, setDescription] = useState('');
-  const [mon, setMon] = useState(0);
+  const [load, setLoad] = React.useState(false);
 
   const navigateToOk = useCallback(async () => {
     if (!description) {
       Alert.alert('Transação', 'informe uma descrição ');
       return;
     }
+
+    setLoad(true);
 
     const dados = {
       send_id: user.id,
@@ -45,14 +50,37 @@ export function OrderB2b() {
       assunto: description,
     };
 
-    await api
-      .post('/b2b/create-b2b', dados)
+    await b2bCreate(dados)
       .then(h => {
-        Alert.alert('Sua solicitação foi enviada com sucesso!');
-        navigate('INÍCIO');
+        sendMessage({
+          title: 'B2B',
+          token: prestador.token,
+          text: `Você realizou um B2B COM ${prestador.nome}?`,
+        });
+        setLoad(false);
+
+        goBack();
       })
-      .catch(h => console.log('b2b', h.response.data));
-  }, [description, navigate, prestador, user]);
+      .catch(h => {
+        console.log(h);
+        setLoad(false);
+      });
+
+    // await api
+    //   .post('/b2b/create-b2b', dados)
+    //   .then(h => {
+    //     Alert.alert('Sua solicitação foi enviada com sucesso!');
+    //     goBack();
+    //   })
+    //   .catch(h => console.log('b2b', h.response.data));
+  }, [
+    b2bCreate,
+    description,
+    prestador.id,
+    prestador.nome,
+    user.id,
+    user.nome,
+  ]);
 
   return (
     <S.Container>
@@ -94,9 +122,9 @@ export function OrderB2b() {
                   />
                 )}
 
-                {prestador?.profile?.logoUrl ? (
+                {prestador?.profile?.logo ? (
                   <S.ImageProviderOfice
-                    source={{ uri: prestador?.profile?.logoUrl }}
+                    source={{ uri: prestador?.profile?.logo }}
                   />
                 ) : (
                   <View
@@ -113,8 +141,8 @@ export function OrderB2b() {
             </S.office>
 
             <S.BoxProvider>
-              {prestador?.profile?.avatar_url ? (
-                <S.Avatar source={{ uri: prestador?.profile?.avatar_url }} />
+              {prestador?.profile?.avatar ? (
+                <S.Avatar source={{ uri: prestador?.profile?.avatar }} />
               ) : (
                 <Feather name="user" size={60} color={theme.colors.focus} />
               )}
@@ -151,10 +179,14 @@ export function OrderB2b() {
             />
           </S.BoxInput>
 
-          <S.Buton onPress={navigateToOk}>
-            <S.Title style={{ color: theme.colors.text_secundary }}>
-              Enviar
-            </S.Title>
+          <S.Buton disabled={load} onPress={navigateToOk}>
+            {load ? (
+              <ActivityIndicator />
+            ) : (
+              <S.Title style={{ color: theme.colors.text_secundary }}>
+                Enviar
+              </S.Title>
+            )}
           </S.Buton>
         </View>
       </ScrollView>
