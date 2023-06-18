@@ -1,5 +1,2 @@
-export const update = [
-  { title: 'correção de bugs' },
-  { title: 'Mudanças no layout' },
-];
-export const version = '3.0.2';
+export const update = [{ title: 'correção de bugs' }];
+export const version = '3.0.5';

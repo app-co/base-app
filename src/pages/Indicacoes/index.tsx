@@ -19,6 +19,8 @@ import { Modalize } from 'react-native-modalize';
 
 import { Header } from '../../components/Header';
 import { MembrosComponents } from '../../components/MembrosCompornents';
+import { useIndication } from '../../contexts/indication';
+import { useToken } from '../../contexts/Token';
 import { useCreation } from '../../contexts/useCreation';
 import { useData } from '../../contexts/useData';
 import { IProfileDto, IStars, IUserDtos } from '../../dtos';
@@ -38,6 +40,8 @@ import {
 export function Indicacoes() {
   const { user } = useAuth();
   const { createOrderIndication } = useCreation();
+  const { sendMessage } = useToken();
+  const { indicationCreate } = useIndication();
   const { users } = useData();
   const { nome, id } = user;
 
@@ -87,25 +91,6 @@ export function Indicacoes() {
     return us;
   }, [users]);
 
-  const sendPushNotification = useCallback(async () => {
-    const message = {
-      to: expoToken,
-      sound: 'default',
-      title: 'VOCE FOI INDICADO',
-      body: `Membro do geb ${user.nome} está indicando você para prestar um serviço`,
-    };
-
-    await fetch('https://exp.host/--/api/v2/push/send', {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Accept-encoding': 'gzip, deflate',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(message),
-    });
-  }, [expoToken, user.nome]);
-
   const OpenModal = useCallback(
     (user_id: string, nome: string, token: string) => {
       setUserId(user_id);
@@ -134,7 +119,11 @@ export function Indicacoes() {
         {
           text: 'Ok',
           onPress: () => {
-            sendPushNotification();
+            sendMessage({
+              token: expoToken,
+              title: 'VOCE FOI INDICADO',
+              text: `Membro do geb ${user.nome} está indicando você para prestar um serviço`,
+            });
             navigate('INÍCIO');
           },
         },
@@ -149,7 +138,9 @@ export function Indicacoes() {
     descricao,
     telefoneCliente,
     createOrderIndication,
-    sendPushNotification,
+    sendMessage,
+    expoToken,
+    user.nome,
     navigate,
   ]);
 

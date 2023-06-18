@@ -48,12 +48,14 @@ export function B2b({ children }: TCreation) {
     });
   }, []);
 
-  const b2bUpdate = React.useCallback(async (id: string) => {
-    await api.put('b2b/validate-b2b', { id }).then(h => {
-      b2bListMe.refetch();
-      console.log(h.data);
-    });
-  }, []);
+  const b2bUpdate = React.useCallback(
+    async (id: string) => {
+      await api.put('b2b/validate-b2b', { id }).then(h => {
+        b2bListMe.refetch();
+      });
+    },
+    [b2bListMe],
+  );
 
   const b2bDelete = React.useCallback(async (id: string) => {
     await api.delete(`b2b/del-b2b${id}`);

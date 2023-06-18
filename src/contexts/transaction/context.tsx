@@ -45,7 +45,15 @@ export function Transaction({ children }: TCreation) {
   });
 
   const transactionCreate = React.useCallback(async (item: ITransaction) => {
-    await api.post('transaction/create-transaction', { item });
+    await api
+      .post('transaction/create-transaction', {
+        prestador_id: item.prestador_id,
+        prestador_name: item.prestador_name,
+        descricao: item.descricao,
+        valor: item.valor,
+      })
+      .then(h => console.log('ok'))
+      .catch(h => console.log(h.response.data));
   }, []);
 
   const transactionDelete = React.useCallback(async (id: string) => {

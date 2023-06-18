@@ -9,6 +9,7 @@ import {
   MaterialCommunityIcons,
   MaterialIcons,
 } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 import {
   addDays,
   addMonths,
@@ -21,8 +22,9 @@ import {
   subMonths,
 } from 'date-fns';
 import { Box, Center, HStack } from 'native-base';
-import React, { useContext, useState } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 import {
+  ActivityIndicator,
   FlatList,
   ScrollView,
   TextInput,
@@ -117,6 +119,17 @@ export function Consumo() {
   const { donateListAll } = useDonate();
   const { padrinhoListMe } = usePadrinho();
 
+  const reloaded = React.useCallback(async () => {
+    indicationListMe.refetch();
+    presencaListAll.refetch();
+    b2bListMe.refetch();
+    invitListAll.refetch();
+    donateListAll.refetch();
+    padrinhoListMe.refetch();
+    transactionListByPrestador.refetch();
+    setDate(new Date());
+  }, []);
+
   const handlePlus = React.useCallback(async () => {
     const dt = addDays(date, 1);
 
@@ -186,14 +199,8 @@ export function Consumo() {
           }
         });
       setTransactionC(rsClient);
-    } catch (err) {
-      console.log(err.response);
-    }
+    } catch (err) {}
   }, [date, transactionListByClient.data, transactionListByPrestador.data]);
-
-  React.useEffect(() => {
-    listTransaction();
-  }, [listTransaction]);
 
   const currencyDateFormated = format(date, 'dd/MM/yy');
 
@@ -346,6 +353,24 @@ export function Consumo() {
     user.id,
   ]);
 
+  useFocusEffect(
+    useCallback(() => {
+      listTransaction();
+    }, [listTransaction]),
+  );
+
+  if (
+    indicationListMe.isLoading &&
+    presencaListAll.isLoading &&
+    b2bListMe.isLoading &&
+    invitListAll.isLoading &&
+    donateListAll.isLoading &&
+    padrinhoListMe.isLoading &&
+    transactionListByPrestador.isLoading
+  ) {
+    return <ActivityIndicator />;
+  }
+
   return (
     <S.Container>
       <Header />
@@ -392,7 +417,7 @@ export function Consumo() {
         <Center>
           <S.text>{currencyDateFormated}</S.text>
           <S.title>{format(date, 'dd')}</S.title>
-          <S.reloaded onPress={() => setDate(new Date())}>
+          <S.reloaded onPress={reloaded}>
             <S.text style={{ color: '#fff' }}>AUTALIZAR</S.text>
           </S.reloaded>
         </Center>

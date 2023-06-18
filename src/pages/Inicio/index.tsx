@@ -48,6 +48,7 @@ import { useB2b } from '../../contexts/b2b';
 import { useIndication } from '../../contexts/indication';
 import { useOrderTransaction } from '../../contexts/orderTransaction';
 import { useToken } from '../../contexts/Token';
+import { useTransaction } from '../../contexts/transaction';
 import { useCreation } from '../../contexts/useCreation';
 import { useData } from '../../contexts/useData';
 import { useOrders } from '../../contexts/useOrders';
@@ -78,20 +79,18 @@ interface PropsValorTotal {
 export function Inicio() {
   const { user, logOut } = useAuth();
   const { indRank } = useData();
-  const {
-    aprovedB2b,
-    deletB2b,
-    aprovedOrderTransaction,
-    deleteOrderTransaction,
-    createTransaction,
-    aprovedOrderIndication,
-  } = useCreation();
 
   const [load, setLoad] = React.useState(false);
 
-  const { b2bListMe, b2bUpdate } = useB2b();
-  const { orderTransactionListByPrestador } = useOrderTransaction();
-  const { indicationListMe, indicationDelete } = useIndication();
+  const { b2bListMe, b2bUpdate, b2bDelete } = useB2b();
+  const {
+    orderTransactionListByPrestador,
+    orderTransactionDelete,
+    orderTransactionUpdate,
+  } = useOrderTransaction();
+  const { indicationListMe, indicationDelete, indicationUpdate } =
+    useIndication();
+  const { transactionCreate } = useTransaction();
 
   const [showOrderB2b, setShowOrderB2b] = React.useState(false);
   const [shwTransaction, setShowTransaction] = React.useState(false);
@@ -162,42 +161,34 @@ export function Inicio() {
   const recuseOrderB2b = React.useCallback(
     async (id: string) => {
       setLoad(true);
-      await deletB2b(id).then(() => {
+      await b2bDelete(id).then(() => {
         setLoad(false);
         b2bListMe.refetch();
       });
     },
-    [deletB2b, b2bListMe],
+    [b2bDelete, b2bListMe],
   );
 
-  const confirmatioTransaction = React.useCallback(
+  const confirmatioOrderConsumo = React.useCallback(
     async (item: IOrderTransaction) => {
       setLoad(true);
-      const dados = {
-        consumidor_name: item.consumidor_id,
-        consumidor_id: item.consumidor_id,
-        prestador_name: item.prestador_name,
-        prestador_id: item.prestador_id,
-        descricao: item.descricao,
-        order_id: item.id,
-        valor: item.valor,
-      };
-      aprovedOrderTransaction(dados).then(h => {
+
+      orderTransactionUpdate(item).then(h => {
         orderTransactionListByPrestador.refetch();
         setLoad(false);
       });
     },
-    [aprovedOrderTransaction, orderTransactionListByPrestador],
+    [orderTransactionListByPrestador, orderTransactionUpdate],
   );
 
   const recuseTransactionOrder = React.useCallback(
     async (id: string) => {
       setLoad(true);
-      await deleteOrderTransaction(id);
+      await orderTransactionDelete(id);
       orderTransactionListByPrestador.refetch();
       setLoad(false);
     },
-    [deleteOrderTransaction, orderTransactionListByPrestador],
+    [orderTransactionDelete, orderTransactionListByPrestador],
   );
 
   const loadVendas = React.useCallback(async () => {
@@ -258,10 +249,10 @@ export function Inicio() {
         case 'handshak':
           setLoad(true);
 
-          createTransaction(dados).then(() => {
-            aprovedOrderIndication({
-              id: item.id,
-              who_indication: item.quemIndicou_id,
+          transactionCreate(dados).then(() => {
+            indicationUpdate({
+              indicado_id: item.indicado_id,
+              indication_id: item.id!,
             }).then(() => {
               indicationListMe.refetch();
               setLoad(false);
@@ -278,9 +269,9 @@ export function Inicio() {
           setLoad(true);
           indicationDelete(item.id!).then(() => {
             setLoad(false);
-            aprovedOrderIndication({
-              id: item.id,
-              who_indication: item.quemIndicou_id,
+            indicationUpdate({
+              indicado_id: item.indicado_id,
+              indication_id: item.quemIndicou_id,
             });
           });
 
@@ -291,11 +282,11 @@ export function Inicio() {
       }
     },
     [
-      aprovedOrderIndication,
-      createTransaction,
       description,
       indicationDelete,
       indicationListMe,
+      indicationUpdate,
+      transactionCreate,
       user.id,
       user.nome,
       value,
@@ -392,7 +383,7 @@ export function Inicio() {
               <ListTransactionOrder
                 load={load}
                 item={h}
-                confirmation={() => confirmatioTransaction(h)}
+                confirmation={() => confirmatioOrderConsumo(h)}
                 recuse={() => recuseTransactionOrder(h.id)}
               />
             )}
@@ -410,7 +401,7 @@ export function Inicio() {
                 load={load}
                 valueType={h => setValueType(h)}
                 confirmation={() => handleIndication(h, index)}
-                reject={() => deleteIndication(h.id!)}
+                reject={() => handledeleteIndication(h.id!)}
                 item={h}
                 form={
                   <Form>

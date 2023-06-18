@@ -41,19 +41,16 @@ export function Indication({ children }: TCreation) {
   });
 
   const indicationCreate = React.useCallback(async (item: IIndicationDto) => {
-    await api.post('indication/create-indication', { item });
+    await api.post('indication/create-indication', item);
   }, []);
 
   const indicationUpdate = React.useCallback(async (item: Props) => {
     await api
-      .put('indication/validate-indication', {
-        indicado_id: item.indicado_id,
-        idication_id: item.indication_id,
-      })
+      .put('indication/validate-indication', item)
       .then(() => {
         indicationListMe.refetch();
       })
-      .catch(h => console.log('erro'));
+      .catch(h => console.log(h.response.data));
   }, []);
 
   const indicationDelete = React.useCallback(async (id: string) => {

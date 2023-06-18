@@ -51,14 +51,24 @@ export function OrderTransaction({ children }: TCreation) {
 
   const orderTransactionCreate = React.useCallback(
     async (item: IOrderTransaction) => {
-      await api.post('consumo//order-transaction', { item });
+      await api.post('consumo/order-transaction', { item });
     },
     [],
   );
 
   const orderTransactionUpdate = React.useCallback(
     async (item: ITransaction) => {
-      await api.put('create-transaction', { item });
+      await api
+        .post('/transaction/create-transaction', {
+          consumidor_name: item.consumidor_id,
+          consumidor_id: item.consumidor_id,
+          prestador_name: item.prestador_name,
+          prestador_id: item.prestador_id,
+          descricao: item.descricao,
+          order_id: item.id,
+          valor: item.valor,
+        })
+        .catch(h => console.log(h.response));
     },
     [],
   );
