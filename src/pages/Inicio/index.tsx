@@ -437,7 +437,7 @@ export function Inicio() {
       </Modal>
 
       <Center>
-        <S.text style={{ fontFamily: 'mediun', fontSize: _subTitle }}>
+        <S.text style={{ fontFamily: 'medium', fontSize: _subTitle }}>
           {user.nome}
         </S.text>
         <S.text>{user.profile.workName}</S.text>
