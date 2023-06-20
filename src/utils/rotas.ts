@@ -93,6 +93,14 @@ export const rotas = [
     component: Donates,
     icon: 'user-plus',
   },
+
+  {
+    focus: theme.colors.focus,
+    color: theme.colors.focus_light_3,
+    name: 'APADRINHAR',
+    component: Padrinho,
+    icon: 'user-plus',
+  },
 ];
 
 export const rotasAdm = [

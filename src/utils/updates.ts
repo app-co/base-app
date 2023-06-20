@@ -1,2 +1,2 @@
-export const update = [{ title: 'correção de bugs' }];
-export const version = '3.0.5';
+export const update = [{ title: 'Adicionado função de apadrinhamento' }];
+export const version = '3.0.7';
