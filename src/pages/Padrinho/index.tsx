@@ -100,27 +100,6 @@ export function Padrinho() {
           </S.button>
         )}
       />
-
-      {/* <FlatList
-        data={users}
-        keyExtractor={h => h.id}
-        renderItem={({ item: h }) => (
-          <MembrosApadrinhado
-            imageOfice={h.profile.logo}
-            oficio={h.profile.workNa
-            userName={h.nome}
-            user_avatar={h.profile.avatar}
-            pres={() =>
-              handleApadrinhar({
-                user_id: h.id,
-                nome: h.nome,
-              })
-            }
-            inativoPres={h.situation.apadrinhado}
-            inativo={h.situation.apadrinhado}
-          />
-        )}
-      /> */}
     </NativeBaseProvider>
   );
 }
