@@ -75,7 +75,7 @@ export const rotas = [
     color: theme.colors.focus_light_3,
     name: 'B2B',
     component: StackB2b,
-    icon: 'users',
+    icon: 'coffee',
   },
 
   {
@@ -91,7 +91,7 @@ export const rotas = [
     color: theme.colors.focus_light_3,
     name: 'DONATIVOS',
     component: Donates,
-    icon: 'user-plus',
+    icon: 'diamond',
   },
 
   {
@@ -99,7 +99,7 @@ export const rotas = [
     color: theme.colors.focus_light_3,
     name: 'APADRINHAR',
     component: Padrinho,
-    icon: 'user-plus',
+    icon: 'mortar-board',
   },
 ];
 
