@@ -13,6 +13,7 @@ import {
   useNavigation,
 } from '@react-navigation/native';
 import { Form } from '@unform/mobile';
+import * as Contants from 'expo-constants';
 import * as Notifications from 'expo-notifications';
 import {
   Avatar,
@@ -79,6 +80,8 @@ interface PropsValorTotal {
 export function Inicio() {
   const { user, logOut } = useAuth();
   const { indRank } = useData();
+  const version = Contants.default.expoConfig?.version;
+  console.log(version);
 
   const [load, setLoad] = React.useState(false);
 
@@ -477,6 +480,10 @@ export function Inicio() {
       ) : (
         <Classificacao item={rank} />
       )}
+
+      <Text style={{ fontWeight: '700', marginTop: 20, marginLeft: 10 }}>
+        version: {version}
+      </Text>
     </S.Container>
   );
 }

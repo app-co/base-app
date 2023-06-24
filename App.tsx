@@ -98,9 +98,9 @@ export default function App() {
                     <Text fontFamily={theme.fonts.bold} fontSize="16">
                       UMA NOVA ATUALIZAÇÃO ESTA DISPONÍVEL
                     </Text>
-                    {update.map(h => (
+                    {/* {update.map(h => (
                       <Text>{h.title}</Text>
-                    ))}
+                    ))} */}
                     <Text>{version}</Text>
                   </Box>
                   <ButtonBase onPress={ReloadDevice} mt="10">

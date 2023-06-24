@@ -41,7 +41,8 @@ export function Padrinho() {
   const list =
     search !== ''
       ? users.filter(h => {
-          if (h.nome.includes(search.toUpperCase())) {
+          const uper = h.nome.toUpperCase();
+          if (uper.includes(search.toUpperCase())) {
             return h;
           }
         })
@@ -65,7 +66,15 @@ export function Padrinho() {
           Alert.alert('Sucesso!', `membro ${nome} foi apadrinhado`);
           loadUser();
         })
-        .catch(h => console.log('erro no padrinho', h.response.data));
+        .catch(h => {
+          const mess = h.response.data.status;
+          if (mess) {
+            return Alert.alert(
+              'Atenção',
+              'Este membro já está afiliado a outro membro',
+            );
+          }
+        });
     },
     [loadUser, user],
   );
