@@ -38,9 +38,11 @@ export function ListMembro({
         <TitleData>{data}</TitleData>
 
         <BoxButton>
-          <Box />
-          <ButtonPresensa onPress={pres} type="2">
+          <ButtonPresensa onPress={descartar} type="2">
             <TitleButton>DELETAR</TitleButton>
+          </ButtonPresensa>
+          <ButtonPresensa onPress={pres} type="1">
+            <TitleButton>APROVAR</TitleButton>
           </ButtonPresensa>
         </BoxButton>
       </View>

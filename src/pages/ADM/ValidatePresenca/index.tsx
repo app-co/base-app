@@ -11,7 +11,7 @@ import { ListMembro } from '../../../components/ListMembro';
 import { useData } from '../../../contexts/useData';
 import { IPresencaDto, IProfileDto, IUserDtos } from '../../../dtos';
 import { api } from '../../../services/api';
-import { Container } from './styles';
+import * as S from './styles';
 
 export interface ProsPresenca {
   createdAt: string;
@@ -40,55 +40,47 @@ export function ListPresenca() {
   const [presenca, setPresenca] = useState<Props[]>([]);
   const [load, setLoad] = React.useState(true);
 
-  const userList = (users.data as IUserDtos[]) || [];
-
-  console.log(userList);
-
   const listOrdersPresenca = React.useCallback(async () => {
-    await api.get('/user/list-all-user').then(async user => {
-      const membro = user.data as IUserDtos[];
+    const membro = (users.data as IUserDtos[]) || [];
 
-      await api
-        .get('/presenca/list-all-order-presenca')
-        .then(async presenca => {
-          const rs = presenca.data as IPresencaDto[];
+    await api
+      .get('/presenca/list-all-order-presenca')
+      .then(async presenca => {
+        const rs = presenca.data as IPresencaDto[];
 
-          const response = rs
-            .filter(fil => {
-              const profile = membro.find(h => {
-                console.log(h.id);
-                if (h.id === fil.user_id) {
-                  return h;
-                }
-              });
-
-              if (profile) {
-                return fil;
+        const response = rs
+          .filter(fil => {
+            const profile = membro.find(h => {
+              if (h.id === fil.user_id) {
+                return h;
               }
-            })
-            .map(respo => {
-              const profile = membro.find(h => {
-                if (h.id === respo.user_id) {
-                  return h;
-                }
-              });
-              return {
-                presenca: {
-                  ...respo,
-                  data: format(new Date(respo.createdAt), 'dd/MM/yy'),
-                },
-                profile: {
-                  avatar: profile.profile.avatar,
-                },
-              };
-            })
-            .filter(h => h !== undefined);
-          setPresenca(response);
-        })
-        .catch(h => console.log('erro ao carregar presenca', h))
-        .finally(() => setLoad(false));
-    });
-  }, []);
+            });
+
+            if (profile) {
+              return fil;
+            }
+          })
+          .map(respo => {
+            const profile = membro.find(h => {
+              if (h.id === respo.user_id) {
+                return h;
+              }
+            });
+            return {
+              presenca: {
+                ...respo,
+                data: format(new Date(respo.createdAt), 'dd/MM/yy'),
+              },
+              profile: {
+                avatar: profile?.profile.avatar,
+              },
+            };
+          })
+          .filter(h => h !== undefined);
+        setPresenca(response);
+      })
+      .catch(h => console.log('erro ao carregar presenca', h));
+  }, [users.data]);
 
   useFocusEffect(
     useCallback(() => {
@@ -126,17 +118,16 @@ export function ListPresenca() {
     [listOrdersPresenca],
   );
 
-  if (load) {
+  if (users.isLoading) {
     return <ActivityIndicator />;
   }
 
   return (
-    <Container>
+    <S.Container>
       <Header />
-
       <FlatList
         contentContainerStyle={{
-          paddingBottom: 100,
+          paddingBottom: 200,
         }}
         data={presenca}
         keyExtractor={h => h.presenca.id}
@@ -158,6 +149,6 @@ export function ListPresenca() {
           />
         )}
       />
-    </Container>
+    </S.Container>
   );
 }

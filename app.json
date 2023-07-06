@@ -2,14 +2,14 @@
   "expo": {
     "name": "GEB networking",
     "slug": "aplicativogeb",
-    "version": "3.1.1",
+    "version": "3.1.4",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "cover",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#071566"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -23,7 +23,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#071566"
       },
       "versionCode": 35,
       "package": "com.appc.gebtraining",
@@ -55,7 +55,7 @@
         "projectId": "3f0c01b7-dfb6-4ce3-a5c8-32950dc2f3b1"
       }
     },
-    "runtimeVersion": "3.0.1",
+    "runtimeVersion": "3.0.4",
     "updates": {
       "url": "https://u.expo.dev/3f0c01b7-dfb6-4ce3-a5c8-32950dc2f3b1"
     }

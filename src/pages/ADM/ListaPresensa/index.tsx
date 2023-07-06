@@ -25,8 +25,6 @@ export function ListaPresença() {
   const [presenca, setPresenca] = useState<Props[]>([]);
   const [load, setLoad] = React.useState(true);
 
-  console.log(users.data);
-
   const listOrdersPresenca = React.useCallback(async () => {
     await api.get('/user/list-all-user').then(async user => {
       const membro = user.data as IUserDtos[];

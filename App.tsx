@@ -30,7 +30,7 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import theme from './src/global/styles/theme';
 import { AuthContextProvider } from './src/hooks/AuthContext';
 import { Route } from './src/routes';
-import { update, version } from './src/utils/updates';
+import { update } from './src/utils/updates';
 
 export default function App() {
   const appState = useRef(AppState.currentState);
@@ -101,7 +101,6 @@ export default function App() {
                     {/* {update.map(h => (
                       <Text>{h.title}</Text>
                     ))} */}
-                    <Text>{version}</Text>
                   </Box>
                   <ButtonBase onPress={ReloadDevice} mt="10">
                     ATUALIZAR

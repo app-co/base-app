@@ -81,7 +81,6 @@ export function Inicio() {
   const { user, logOut } = useAuth();
   const { indRank } = useData();
   const version = Contants.default.expoConfig?.version;
-  console.log(version);
 
   const [load, setLoad] = React.useState(false);
 
@@ -349,141 +348,141 @@ export function Inicio() {
 
   return (
     <S.Container>
-      <Header
-        openMail={openModalOrders}
-        title="Home"
-        orders={{
-          b2b: orders.b2b.length,
-          indication: orders.indication.length,
-          transaction: orders.transaction.length,
-        }}
-      />
-      {/* MODAL B2B */}
-      <Modal visible={showOrderB2b} animationType="fade" transparent>
-        <ModalComp closed={() => setShowOrderB2b(false)} title="B2B">
-          <FlatList
-            data={orders.b2b}
-            keyExtractor={h => String(h.id)}
-            renderItem={({ item: h }) => (
-              <ListB2bOrder
-                load={load}
-                name={h.send_name}
-                description={h.assunto}
-                confirmation={() => confirmatioOrderB2b(h)}
-                recuse={() => recuseOrderB2b(h.id!)}
-              />
-            )}
-          />
-        </ModalComp>
-      </Modal>
+      <Box flex={1}>
+        <Header
+          openMail={openModalOrders}
+          title="Home"
+          orders={{
+            b2b: orders.b2b.length,
+            indication: orders.indication.length,
+            transaction: orders.transaction.length,
+          }}
+        />
+        {/* MODAL B2B */}
+        <Modal visible={showOrderB2b} animationType="fade" transparent>
+          <ModalComp closed={() => setShowOrderB2b(false)} title="B2B">
+            <FlatList
+              data={orders.b2b}
+              keyExtractor={h => String(h.id)}
+              renderItem={({ item: h }) => (
+                <ListB2bOrder
+                  load={load}
+                  name={h.send_name}
+                  description={h.assunto}
+                  confirmation={() => confirmatioOrderB2b(h)}
+                  recuse={() => recuseOrderB2b(h.id!)}
+                />
+              )}
+            />
+          </ModalComp>
+        </Modal>
 
-      <Modal visible={shwTransaction} animationType="fade" transparent>
-        <ModalComp closed={() => setShowTransaction(false)} title="Consumo">
-          <FlatList
-            data={orders.transaction}
-            keyExtractor={h => h.id}
-            renderItem={({ item: h }) => (
-              <ListTransactionOrder
-                load={load}
-                item={h}
-                confirmation={() => confirmatioOrderConsumo(h)}
-                recuse={() => recuseTransactionOrder(h.id)}
-              />
-            )}
-          />
-        </ModalComp>
-      </Modal>
+        <Modal visible={shwTransaction} animationType="fade" transparent>
+          <ModalComp closed={() => setShowTransaction(false)} title="Consumo">
+            <FlatList
+              data={orders.transaction}
+              keyExtractor={h => h.id}
+              renderItem={({ item: h }) => (
+                <ListTransactionOrder
+                  load={load}
+                  item={h}
+                  confirmation={() => confirmatioOrderConsumo(h)}
+                  recuse={() => recuseTransactionOrder(h.id)}
+                />
+              )}
+            />
+          </ModalComp>
+        </Modal>
 
-      <Modal visible={showIndication} animationType="fade" transparent>
-        <ModalComp closed={() => setShowIndication(false)} title="">
-          <FlatList
-            data={orders.indication}
-            keyExtractor={h => h.id!}
-            renderItem={({ item: h, index }) => (
-              <OrderIndicationComp
-                load={load}
-                valueType={h => setValueType(h)}
-                confirmation={() => handleIndication(h, index)}
-                reject={() => handledeleteIndication(h.id!)}
-                item={h}
-                form={
-                  <Form>
-                    <Center m={10}>
-                      <Input
-                        placeholderTextColor="#b6b6b6"
-                        name="name"
-                        placeholder="Digite o valor que foi negociado"
-                        onChangeText={h => setValue(_currency(h))}
-                        value={value}
-                        keyboardType="numeric"
-                      />
+        <Modal visible={showIndication} animationType="fade" transparent>
+          <ModalComp closed={() => setShowIndication(false)} title="">
+            <FlatList
+              data={orders.indication}
+              keyExtractor={h => h.id!}
+              renderItem={({ item: h, index }) => (
+                <OrderIndicationComp
+                  load={load}
+                  valueType={h => setValueType(h)}
+                  confirmation={() => handleIndication(h, index)}
+                  reject={() => handledeleteIndication(h.id!)}
+                  item={h}
+                  form={
+                    <Form>
+                      <Center m={10}>
+                        <Input
+                          placeholderTextColor="#b6b6b6"
+                          name="name"
+                          placeholder="Digite o valor que foi negociado"
+                          onChangeText={h => setValue(_currency(h))}
+                          value={value}
+                          keyboardType="numeric"
+                        />
 
-                      <TextArea
-                        w="64"
-                        mt="2"
-                        _focus={{
-                          backgroundColor: theme.colors.secundary,
-                          fontFamily: theme.fonts.regular,
-                        }}
-                        color="#fff"
-                        placeholder="Descricão"
-                        onChangeText={setDescription}
-                        value={description}
-                      />
-                    </Center>
-                  </Form>
-                }
-              />
-            )}
-          />
-        </ModalComp>
-      </Modal>
+                        <TextArea
+                          w="64"
+                          mt="2"
+                          _focus={{
+                            backgroundColor: theme.colors.secundary,
+                            fontFamily: theme.fonts.regular,
+                          }}
+                          color="#fff"
+                          placeholder="Descricão"
+                          onChangeText={setDescription}
+                          value={description}
+                        />
+                      </Center>
+                    </Form>
+                  }
+                />
+              )}
+            />
+          </ModalComp>
+        </Modal>
 
-      <Center>
-        <S.text style={{ fontFamily: 'medium', fontSize: _subTitle }}>
-          {user.nome}
-        </S.text>
-        <S.text>{user.profile.workName}</S.text>
-      </Center>
-
-      <HStack space={10} justifyContent="center" my="4" alignItems="center">
-        <Avatar size="xl" source={{ uri: user?.profile.avatar }} />
-
-        <Box w="1" bg="black" h="full" />
-
-        <Box alignItems="flex-end">
-          <S.text>Vendas este ano:</S.text>
-          <S.text style={{ fontSize: _subTitle, fontFamily: 'medium' }}>
-            {calculo.totalValorVenda}
+        <Center>
+          <S.text style={{ fontFamily: 'medium', fontSize: _subTitle }}>
+            {user.nome}
           </S.text>
+          <S.text>{user.profile.workName}</S.text>
+        </Center>
 
-          <S.text>Meus pontos:</S.text>
-          <S.text style={{ fontSize: _subTitle, fontFamily: 'medium' }}>
-            {calculo.totalPonts}
-          </S.text>
-        </Box>
-      </HStack>
+        <HStack space={10} justifyContent="center" my="4" alignItems="center">
+          <Avatar size="xl" source={{ uri: user?.profile.avatar }} />
 
-      <Center>
-        <HStack space={2} alignItems="center">
-          <S.text style={{ fontSize: _subTitle }}>Acumulados do GEB:</S.text>
-          <S.text style={{ fontSize: _subTitle, fontFamily: 'medium' }}>
-            {valorGeb?.priceGeb}
-          </S.text>
+          <Box w="1" bg="black" h="full" />
+
+          <Box alignItems="flex-end">
+            <S.text>Vendas este ano:</S.text>
+            <S.text style={{ fontSize: _subTitle, fontFamily: 'medium' }}>
+              {calculo.totalValorVenda}
+            </S.text>
+
+            <S.text>Meus pontos:</S.text>
+            <S.text style={{ fontSize: _subTitle, fontFamily: 'medium' }}>
+              {calculo.totalPonts}
+            </S.text>
+          </Box>
         </HStack>
-      </Center>
 
-      <S.Line />
+        <Center>
+          <HStack space={2} alignItems="center">
+            <S.text style={{ fontSize: _subTitle }}>Acumulados do GEB:</S.text>
+            <S.text style={{ fontSize: _subTitle, fontFamily: 'medium' }}>
+              {valorGeb?.priceGeb}
+            </S.text>
+          </HStack>
+        </Center>
 
-      {indRank.isLoading ? (
-        <ActivityIndicator size={36} />
-      ) : (
-        <Classificacao item={rank} />
-      )}
+        <S.Line />
 
-      <Text style={{ fontWeight: '700', marginTop: 20, marginLeft: 10 }}>
-        version: {version}
-      </Text>
+        {indRank.isLoading ? (
+          <ActivityIndicator size={36} />
+        ) : (
+          <Classificacao item={rank} />
+        )}
+      </Box>
+
+      <Text>version: {version}</Text>
     </S.Container>
   );
 }

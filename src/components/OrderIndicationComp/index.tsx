@@ -111,7 +111,7 @@ export function OrderIndicationComp({
 
       <S.flexButton>
         <S.buttonRe disabled={load} onPress={reject}>
-          {load ? <ActivityIndicator /> : <S.text>REGEITAR</S.text>}
+          {load ? <ActivityIndicator /> : <S.text>REJEITAR</S.text>}
         </S.buttonRe>
 
         <S.buttonOk disabled={load} onPress={confirmation}>

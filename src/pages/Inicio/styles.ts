@@ -22,6 +22,7 @@ export const Container = styled.View`
   background-color: ${colors.primary};
   padding: ${width / 10.5}px 5px;
   padding-top: ${Platform.OS === `ios` ? getStatusBarHeight() : 20}px;
+  justify-content: space-between;
 `;
 
 export const title = styled.Text`
