@@ -39,7 +39,7 @@ export const subTitle = styled.Text`
 
 export const text = styled.Text`
   font-family: ${fonts.Regular};
-  font-size: ${_text + 5}px;
+  font-size: ${_text}px;
   /* color: ${colors.text_secundary}; */
 `;
 

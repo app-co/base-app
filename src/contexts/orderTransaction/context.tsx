@@ -74,7 +74,7 @@ export function OrderTransaction({ children }: TCreation) {
   );
 
   const orderTransactionDelete = React.useCallback(async (id: string) => {
-    await api.delete(`/${id}`);
+    await api.delete(`/consumo/delete-order/${id}`);
   }, []);
 
   return (
