@@ -1,6 +1,5 @@
 export const font = {
-  regular: 'regular',
-  semi_bold: 'semiBold',
-  bold: 'bold',
-  dark: 'dark',
+  light: 'Light',
+  regular: 'Regular',
+  bold: 'Bold',
 };

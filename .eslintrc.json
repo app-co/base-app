@@ -44,6 +44,10 @@
         {
           "newlinesBetween": "always",
           "groups": [
+            "/^react/",
+            "/^react-native/",
+            "/^expo/",
+            "/^@expo/",
             "module",
             "/^@/",
             ["parent", "sibling", "index"]

@@ -1,16 +1,17 @@
-/* eslint-disable import/order */
 import styled from 'styled-components/native';
 
-import { _subTitle, _text, _title } from '@/styles/sizes';
+import { cor } from '@/styles/cor';
+import { _title } from '@/styles/sizes';
 
-export const Container = styled.View``;
+export const Container = styled.View`
+  flex: 1;
+  background-color: ${cor.light['glow-a']};
+
+  padding: 25px;
+`;
 
 export const title = styled.Text`
+  align-self: center;
   font-size: ${_title}px;
-`;
-export const subTitle = styled.Text`
-  font-size: ${_subTitle}px;
-`;
-export const text = styled.Text`
-  font-size: ${_text}px;
+  margin-bottom: 20px;
 `;

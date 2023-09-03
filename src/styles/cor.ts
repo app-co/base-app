@@ -26,4 +26,12 @@ export const cor = {
     3: '#5a0b0b',
     4: '#490909',
   },
+
+  light: {
+    gray: 'rgba(89, 85, 78, 1)',
+    'glow-a': 'rgba(217, 177, 143, 1)',
+    'glow-b': 'rgba(166, 136, 109, 1)',
+    'glow-c': 'rgba(242, 205, 172, 1)',
+    black: 'rgba(12, 12, 12, 1)',
+  },
 };
