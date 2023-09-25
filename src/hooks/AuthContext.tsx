@@ -27,7 +27,7 @@ interface IAuthContextData {
   login(credential: ILogin): Promise<void>;
   loading: boolean;
   logOut(): Promise<void>;
-  updateUser(user: any): Promise<void>;
+  updateUser(): Promise<void>;
 }
 
 type TAuthContext = {
@@ -50,14 +50,17 @@ export function AuthContextProvider({ children }: TAuthContext) {
   const toast = useToast();
   const [data, setData] = useState<AuthState>({} as AuthState);
 
-  const userAndTokenUpdate = React.useCallback(async (token: string) => {
-    api.defaults.headers.common.Authorization = `Bearer ${token}`;
+  const userAndTokenUpdate = React.useCallback(
+    async (token: string) => {
+      api.defaults.headers.common.Authorization = `Bearer ${token}`;
 
-    await api.get('/user/find-user-by-id').then(async h => {
-      const user = h.data;
-      setData({ token, user });
-    });
-  }, []);
+      // await api.get(`/provider/${data.provider.id}`).then(async h => {
+      //   const provider = h.data;
+      //   setData({ token, provider });
+      // });
+    },
+    [data.provider],
+  );
 
   const LoadingUser = useCallback(async () => {
     setLoading(true);
@@ -123,17 +126,17 @@ export function AuthContextProvider({ children }: TAuthContext) {
     setData({} as AuthState);
   }, [data]);
 
-  const updateUser = useCallback(
-    async (provider: any) => {
+  const updateUser = useCallback(async () => {
+    await api.get(`/provider/${data.provider.id}`).then(async h => {
+      const provider = h.data;
       const dados = {
         token: data.token,
         provider,
       };
 
       setData(dados);
-    },
-    [data.token],
-  );
+    });
+  }, [data.provider, data.token]);
 
   const tokkenFail = React.useCallback(async () => {
     logOut();

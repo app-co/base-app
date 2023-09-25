@@ -32,11 +32,11 @@ api.registerIntercepTokenManager = signOut => {
     config => config,
     async requesRrror => {
       const erro = requesRrror?.response?.data;
-      console.log(requesRrror);
+      console.log(requesRrror, 'api');
       if (requesRrror?.response && erro) {
-        const { message } = erro;
-        if (message === 'token inválido' || message === 'falta o token') {
-          console.log(message, 'token epirou');
+        const { error } = erro;
+        if (error === 'token inválido' || error === 'falta o token') {
+          console.log(error, 'token epirou');
           const originalRequest = requesRrror.config;
 
           if (isRefreshing) {
@@ -93,13 +93,13 @@ api.registerIntercepTokenManager = signOut => {
           // return Promise.reject(requesRrror);
         }
 
-        if (message === 'Sua sessão expirou') {
-          console.log(message);
+        if (error === 'Sua sessão expirou') {
+          console.log(error);
           signOut();
           return Promise.reject(requesRrror);
         }
 
-        return Promise.reject(new AppError(message));
+        return Promise.reject(new AppError(error));
       }
 
       return Promise.reject(erro);
@@ -120,7 +120,7 @@ export { api };
 //     return res;
 //   },
 //   (error: AxiosError) => {
-//     const message = error?.response?.data?.message;
+//     const error = error?.response?.data?.error;
 //     const status = error?.response?.status;
 
 //     console.log(error, 'api');

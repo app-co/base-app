@@ -1,13 +1,16 @@
 import React from 'react';
-import { TouchableOpacity } from 'react-native';
+import { FlatList, TouchableOpacity } from 'react-native';
 
 import {
-  addDays,
   addMonths,
   addYears,
   format,
   getDate,
+  getMonth,
   getYear,
+  isPast,
+  isWithinInterval,
+  set,
   subDays,
   subMonths,
   subYears,
@@ -15,134 +18,140 @@ import {
 import { Box, Center, HStack, Radio } from 'native-base';
 import * as Ico from 'phosphor-react-native';
 
+import { IAppointment } from '@/dtos';
+import { useAuth } from '@/hooks/useAuth';
+import { cor } from '@/styles/cor';
+
 import { Menu } from '../../components/Menu';
 import { Select } from '../../components/Select';
 import { UserList } from '../../components/UserList';
 import * as S from './styles';
+import { Container } from './styles';
 
 type TSelectType = 'DIA' | 'MES' | 'ANO';
+
+const months: any = {
+  0: 'Jan',
+  1: 'Fev',
+  2: 'Mar',
+  3: 'Abr',
+  4: 'Mai',
+  5: 'Jun',
+  6: 'Jul',
+  7: 'Ago',
+  8: 'Set',
+  9: 'Out',
+  10: 'Nov',
+  11: 'Dez',
+};
+
+const byDay = Array.from({ length: 31 }, (_, index) => index + 1);
+
+interface Appointment {
+  day: number;
+  item: IAppointment[];
+}
+
 export function Agenda() {
-  const [selectType, setSelectType] = React.useState<TSelectType>('DIA');
+  const { provider } = useAuth();
   const [day, setDay] = React.useState(new Date());
 
+  const data = React.useMemo(() => {
+    const apoint = provider.appointment
+      .sort((a, b) => {
+        if (a.start < b.start) {
+          return -1;
+        }
+      })
+      .filter(h => {
+        const dateApoint = format(new Date(h.start), 'MM-yy');
+        const currencyDate = format(day, 'MM-yy');
+
+        if (dateApoint === currencyDate) {
+          return h;
+        }
+      })
+      .map(h => {
+        const formated = format(new Date(h.start), 'HH:mm');
+
+        return {
+          ...h,
+          formated,
+        };
+      });
+
+    const appointments: Appointment[] = [];
+
+    byDay.forEach(day => {
+      const item: IAppointment[] = [];
+      apoint.forEach(h => {
+        const dayApoint = Number(format(new Date(h.start), 'dd'));
+
+        if (day === dayApoint) {
+          item.push(h);
+        }
+      });
+
+      const dt = {
+        day,
+        item,
+      };
+
+      appointments.push(dt);
+    });
+
+    return { apoint, appointments };
+  }, [day, provider.appointment]);
+
   const add = React.useCallback(async () => {
-    switch (selectType) {
-      case 'DIA':
-        {
-          const ad = addDays(day, 1);
-          setDay(ad);
-        }
-        break;
-
-      case 'MES':
-        {
-          const mo = addMonths(day, 1);
-          setDay(mo);
-        }
-        break;
-
-      case 'ANO':
-        {
-          const ano = addYears(day, 1);
-          setDay(ano);
-        }
-        break;
-
-      default:
-        break;
-    }
-  }, [day, selectType]);
+    const ad = addMonths(day, 1);
+    setDay(ad);
+  }, [day]);
 
   const minus = React.useCallback(async () => {
-    switch (selectType) {
-      case 'DIA':
-        {
-          const ad = subDays(day, 1);
-          setDay(ad);
-        }
-        break;
+    const ad = subMonths(day, 1);
+    setDay(ad);
+  }, [day]);
 
-      case 'MES':
-        {
-          const mo = subMonths(day, 1);
-          setDay(mo);
-        }
-        break;
-
-      case 'ANO':
-        {
-          const ano = subYears(day, 1);
-          setDay(ano);
-        }
-        break;
-
-      default:
-        break;
-    }
-  }, [day, selectType]);
+  const month = months[getMonth(day)];
 
   return (
     <>
       <Menu />
-      <S.Container>
-        <Center px={4}>
-          <HStack w="full" justifyContent="space-evenly">
-            <Select
-              pres={() => setSelectType('DIA')}
-              selected={selectType === 'DIA'}
-              title="DIA"
-            />
-            <Select
-              pres={() => setSelectType('MES')}
-              selected={selectType === 'MES'}
-              title="MÊS"
-            />
-            <Select
-              pres={() => setSelectType('ANO')}
-              selected={selectType === 'ANO'}
-              title="ANO"
-            />
-          </HStack>
-        </Center>
-
+      <Container>
         <Center>
           <HStack space={8} alignItems="center" mt="4">
             <TouchableOpacity onPress={minus}>
-              <Ico.CaretLeft size={34} weight="duotone" />
+              <Ico.CaretLeft
+                color={cor.light['glow-a']}
+                size={34}
+                weight="duotone"
+              />
             </TouchableOpacity>
 
-            {selectType === 'DIA' && (
-              <Center w="20">
-                <S.title>{getDate(day)}</S.title>
-              </Center>
-            )}
-
-            {selectType === 'MES' && (
-              <Center w="32">
-                <S.title>{format(day, 'MMMM')}</S.title>
-              </Center>
-            )}
-
-            {selectType === 'ANO' && (
-              <Center w="20">
-                <S.title>{getYear(day)}</S.title>
-              </Center>
-            )}
+            <Center w="32">
+              <S.title>{month}</S.title>
+            </Center>
 
             <TouchableOpacity onPress={add}>
-              <Ico.CaretRight size={34} weight="duotone" />
+              <Ico.CaretRight
+                color={cor.light['glow-a']}
+                size={34}
+                weight="duotone"
+              />
             </TouchableOpacity>
           </HStack>
         </Center>
 
         <Box mt="4" p="8">
-          <UserList />
-          <UserList />
-          <UserList />
-          <UserList />
-          <UserList />
+          <FlatList
+            contentContainerStyle={{ paddingBottom: 100 }}
+            data={data.appointments}
+            keyExtractor={h => String(h.day)}
+            renderItem={({ item: h }) => <UserList day={h.day} item={h.item} />}
+          />
         </Box>
-      </S.Container>
+      </Container>
     </>
   );
 }

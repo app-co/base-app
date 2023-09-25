@@ -1,27 +1,32 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { LayoutAnimation, Pressable } from 'react-native';
+import { LayoutAnimation, Pressable, TextInput } from 'react-native';
 
-import { getYear } from 'date-fns';
+import { getDate, getMonth, getYear } from 'date-fns';
 import { Box, HStack, ScrollView, Toast, useToast, VStack } from 'native-base';
+import * as y from 'yup';
 
-import { FlashList } from '@shopify/flash-list';
+import { Input } from '@/components/Input';
+import { InputForm } from '@/components/InputForm';
+import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/services/api';
 import { AppError } from '@/services/AppError';
 import { _hora, _money, _stringToNumber } from '@/utils/mask/hora';
 import { _hourToMinutis } from '@/utils/unidades';
-import { useAuth } from '@/hooks/useAuth';
-import { Input } from '@/components/Input';
-import { InputForm } from '@/components/InputForm';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { FlashList } from '@shopify/flash-list';
 
 import { ButtonConf } from '../../components/ButtonConf';
 import { Menu } from '../../components/Menu';
 import { Select } from '../../components/Select';
+import {
+  daySchemeVocation,
+  monthSchemeVocation,
+  serviceScheme,
+  weekSchemeVocation,
+  workScheme,
+} from './schemes';
 import * as S from './styles';
-
-import { yupResolver } from '@hookform/resolvers/yup';
-
-import * as y from 'yup';
 
 type TVocation = 'DIARIA' | 'SEMANAL' | 'MENSAL' | '';
 
@@ -100,22 +105,32 @@ interface IArrayFolga {
 type TForm = {
   das: string;
   as: string;
+  day: string;
+  month: string;
 };
 
-const scheme = y.object({
-  das: y.string().required('Digite a hora inicial'),
-  as: y.string().required('Digite a hora final'),
-});
+type TService = {};
+
+type TVocationData = {};
 
 export function Config() {
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<TForm>({
-    resolver: yupResolver(scheme),
+  const workControll = useForm({ resolver: yupResolver<TForm>(workScheme) });
+
+  const vocationWeek = useForm({
+    resolver: yupResolver<TForm>(weekSchemeVocation),
   });
-  const { provider } = useAuth();
+
+  const vocationMonth = useForm({
+    resolver: yupResolver<TForm>(monthSchemeVocation),
+  });
+
+  const vocationDay = useForm({
+    resolver: yupResolver<TForm>(daySchemeVocation),
+  });
+
+  const serviceControll = useForm({ resolver: yupResolver(serviceScheme) });
+
+  const { provider, updateUser } = useAuth();
   const toast = useToast();
   const [folga, setFolga] = React.useState<TVocation>('DIARIA');
 
@@ -125,20 +140,9 @@ export function Config() {
 
   // work hours
   const [weekWorkHour, setWeekWorkHour] = React.useState<IWeek[]>([]);
-  const [startWorkHour, setStartWorkHour] = React.useState('');
-  const [endWorkHour, setEndWorkHour] = React.useState('');
 
   // vocation
   const [weekVocation, setWeekvocation] = React.useState(7);
-  const [startVocation, setStartVocation] = React.useState('');
-  const [endVocation, setEndVocation] = React.useState('');
-  const [dayVocation, setDayVocation] = React.useState('');
-  const [monthVocation, setMonthVocation] = React.useState('');
-
-  // SERVICES
-  const [nameService, setNameService] = React.useState('');
-  const [timeService, setTimeService] = React.useState('');
-  const [amountService, setAmoutService] = React.useState('');
 
   const [listFolga, setListFolga] = React.useState<IArrayFolga[]>(myFolga);
 
@@ -173,31 +177,6 @@ export function Config() {
     );
   };
 
-  React.useEffect(() => {
-    const maskHour = _hora(startWorkHour);
-    const endwork = _hora(endWorkHour);
-
-    setStartVocation(_hora(startVocation));
-    setEndVocation(_hora(endVocation));
-
-    const currency = _money(amountService);
-    const timeServ = _hora(timeService);
-
-    setAmoutService(currency);
-
-    setStartWorkHour(maskHour);
-    setEndWorkHour(endwork);
-
-    setTimeService(timeServ);
-  }, [
-    amountService,
-    endVocation,
-    endWorkHour,
-    startVocation,
-    startWorkHour,
-    timeService,
-  ]);
-
   const handleSelect = React.useCallback(
     async (sem: IWeek) => {
       const findindex = weekWorkHour.findIndex(i => i.week === sem.week);
@@ -216,30 +195,10 @@ export function Config() {
 
   const handleUpdateWorkHour = React.useCallback(
     async (data: TForm) => {
-      console.log(data);
-      const from = _hourToMinutis(data.f);
-      const at = _hourToMinutis(endWorkHour);
-      const week = weekWorkHour.map(h => h.id);
       setLoadWorkHour(true);
-
-      if (startWorkHour === '' || endWorkHour === '' || week.length === 0) {
-        toast.show({
-          title: 'Algo deu errado',
-          description: 'Preencha todos os compos',
-          placement: 'bottom',
-          bgColor: 'red.500',
-        });
-        setLoadWorkHour(false);
-
-        return null;
-      }
-
-      toast.show({
-        title: 'Legal',
-        description: 'Sua jornada de trabalho foi alterada com sucesso',
-        placement: 'top',
-        bgColor: 'green.500',
-      });
+      const from = _hourToMinutis(data.das);
+      const at = _hourToMinutis(data.as);
+      const week = weekWorkHour.map(h => h.id);
       try {
         await api.post('/workhour', {
           from,
@@ -247,6 +206,17 @@ export function Config() {
           week,
           fk_provider_id: provider.id,
         });
+
+        toast.show({
+          title: 'Legal',
+          description: 'Sua jornada de trabalho foi alterada com sucesso',
+          placement: 'top',
+          bgColor: 'green.500',
+        });
+
+        updateUser();
+
+        setLoadWorkHour(false);
       } catch (error: any) {
         setLoadVocation(false);
         const isError = error instanceof AppError;
@@ -270,134 +240,135 @@ export function Config() {
         setLoadVocation(false);
       }
     },
-    [endWorkHour, provider.id, startWorkHour, toast, weekWorkHour],
+    [provider.id, toast, weekWorkHour],
   );
 
-  const handleUpdateVocation = React.useCallback(async () => {
-    if (startVocation.length < 4 || endVocation.length < 4) {
-      toast.show({
-        title: 'Algo deu errado',
-        description: 'Os horários devem ter o seguinte formato: "00:00"',
-        placement: 'bottom',
-        bgColor: 'red.500',
-      });
+  const handleUpdateVocation = React.useCallback(
+    async (data: TForm) => {
+      setLoadVocation(true);
 
-      return null;
-    }
+      const dateVariable: any = {
+        DIARIA: {
+          start: `${data.day}:${data.month}:${getYear(new Date())}:${data.das}`,
+          end: `${data.day}:${data.month}:${getYear(new Date())}:${data.as}`,
+        },
+        SEMANAL: {
+          start: `${getDate(new Date())}:${getMonth(new Date())}:${getYear(
+            new Date(),
+          )}:${data.das}`,
+          end: `${getDate(new Date())}:${getMonth(new Date())}:${getYear(
+            new Date(),
+          )}:${data.as}`,
+        },
+        MENSAL: {
+          start: `${getDate(new Date())}:${data.month}:${getYear(new Date())}:${
+            data.das
+          }`,
+          end: `${getDate(new Date())}:${data.month}:${getYear(new Date())}:${
+            data.as
+          }`,
+        },
+      };
 
-    setLoadVocation(true);
-    const start = `${dayVocation}:${monthVocation}:${getYear(
-      new Date(),
-    )}:${startVocation}`;
-    const end = `${dayVocation}:${monthVocation}:${getYear(
-      new Date(),
-    )}:${endVocation}`;
-
-    const week = weekWorkHour.map(h => h.id);
-
-    try {
-      await api.post('/vocation-create', {
-        start,
-        end,
-        weekend: week,
+      const dt = {
+        start: dateVariable[folga].start,
+        end: dateVariable[folga].end,
+        weekend: [weekVocation],
         prestadorId: provider.id,
-      });
+        type: folga,
+      };
 
-      toast.show({
-        title: 'Legal!',
-        description: 'Sua folga foi salva',
-        placement: 'top',
-        bgColor: 'green.500',
-      });
-    } catch (error: any) {
-      setLoadVocation(false);
-      const isError = error instanceof AppError;
+      try {
+        await api.post('/vocation-create', dt);
 
-      if (isError && error?.message) {
         toast.show({
-          title: 'Algo deu errado',
-          description: error.message,
-          placement: 'bottom',
-          bgColor: 'red.500',
+          title: 'Legal!',
+          description: 'Sua folga foi salva',
+          placement: 'top',
+          bgColor: 'green.500',
         });
-      } else {
-        toast.show({
-          title: 'Algo deu errado',
-          description: 'Servidor em manutenção, tente novamente mais tarde',
-          placement: 'bottom',
-          bgColor: 'red.500',
-        });
+
+        updateUser();
+      } catch (error: any) {
+        setLoadVocation(false);
+        const isError = error instanceof AppError;
+
+        if (isError && error?.message) {
+          toast.show({
+            title: 'Algo deu errado',
+            description: error.message,
+            placement: 'bottom',
+            bgColor: 'red.500',
+          });
+        } else {
+          toast.show({
+            title: 'Algo deu errado',
+            description: 'Servidor em manutenção, tente novamente mais tarde',
+            placement: 'bottom',
+            bgColor: 'red.500',
+          });
+        }
+      } finally {
+        setLoadVocation(false);
       }
-    } finally {
-      setLoadVocation(false);
-    }
-  }, [
-    dayVocation,
-    endVocation,
-    monthVocation,
-    provider.id,
-    startVocation,
-    toast,
-    weekWorkHour,
-  ]);
+    },
+    [folga, provider.id, toast, updateUser, weekVocation],
+  );
 
-  const handleCreateService = React.useCallback(async () => {
-    setLoadService(true);
-    const amount = _stringToNumber(amountService);
-    const duration = _hourToMinutis(timeService);
+  const handleCreateService = React.useCallback(
+    async (data: TService) => {
+      setLoadService(true);
+      const amount = _stringToNumber(data.value);
+      const duration = _hourToMinutis(data.time);
 
-    if (amountService === '' || timeService === '' || nameService === '') {
-      toast.show({
-        title: 'Algo deu errado',
-        description: 'Preencha todos os compos',
-        placement: 'bottom',
-        bgColor: 'red.500',
-      });
-      return null;
-    }
-
-    try {
-      await api.post('/service', {
-        name: nameService,
-        amount,
-        duration,
-        fk_provider_id: provider.id,
-        description: 'alongamento facial',
-      });
-
-      toast.show({
-        title: 'Legal!',
-        description: 'Serviço salvo com sucesso.',
-        placement: 'bottom',
-        bgColor: 'green.500',
-      });
-
-      setNameService('');
-      setTimeService('');
-      setAmoutService('');
-    } catch (error: any) {
-      const isError = error instanceof AppError;
-      setLoadService(false);
-
-      if (isError && error?.message) {
-        toast.show({
-          title: 'Algo deu errado',
-          description: error.message,
-          placement: 'bottom',
-          bgColor: 'red.500',
+      try {
+        await api.post('/service', {
+          name: data.name.trim(),
+          amount,
+          duration,
+          fk_provider_id: provider.id,
+          description: data.description,
         });
-      } else {
+
         toast.show({
-          title: 'Algo deu errado',
-          description: 'Servidor em manutenção, tente novamente mais tarde',
+          title: 'Legal!',
+          description: 'Serviço salvo com sucesso.',
           placement: 'bottom',
-          bgColor: 'red.500',
+          bgColor: 'green.500',
         });
+
+        updateUser();
+      } catch (error: any) {
+        const isError = error instanceof AppError;
+        setLoadService(false);
+
+        if (isError && error?.message) {
+          toast.show({
+            title: 'Algo deu errado',
+            description: error.message,
+            placement: 'bottom',
+            bgColor: 'red.500',
+          });
+        } else {
+          toast.show({
+            title: 'Algo deu errado',
+            description: 'Servidor em manutenção, tente novamente mais tarde',
+            placement: 'bottom',
+            bgColor: 'red.500',
+          });
+        }
+      } finally {
+        setLoadService(false);
       }
-    } finally {
-      setLoadService(false);
-    }
-  }, [amountService, nameService, provider.id, timeService, toast]);
+    },
+    [provider.id, toast],
+  );
+
+  const variable: any = {
+    DIARIA: vocationDay.handleSubmit(handleUpdateVocation),
+    SEMANAL: vocationWeek.handleSubmit(handleUpdateVocation),
+    MENSAL: vocationMonth.handleSubmit(handleUpdateVocation),
+  };
 
   return (
     <>
@@ -413,10 +384,11 @@ export function Config() {
                 <InputForm
                   icon="clock"
                   name="das"
-                  error={errors.das}
-                  control={control}
+                  error={workControll.formState.errors.das}
+                  control={workControll.control}
                   render={({ onChange, value }) => (
                     <S.input
+                      keyboardType="numeric"
                       placeholder="00:00"
                       type="text"
                       value={_hora(value)}
@@ -424,13 +396,6 @@ export function Config() {
                     />
                   )}
                 />
-                {/* <S.input
-                  onChangeText={setStartWorkHour}
-                  value={startWorkHour}
-                  keyboardType="numeric"
-                  placeholder="00:00"
-                  maxLength={5}
-                /> */}
               </HStack>
 
               <HStack alignItems="center" space={4}>
@@ -438,24 +403,18 @@ export function Config() {
                 <InputForm
                   icon="clock"
                   name="as"
-                  error={errors.as}
-                  control={control}
+                  error={workControll.formState.errors.as}
+                  control={workControll.control}
                   render={({ onChange, value }) => (
                     <S.input
                       placeholder="00:00"
+                      keyboardType="numeric"
                       type="text"
                       value={_hora(value)}
                       onChangeText={onChange}
                     />
                   )}
                 />
-                {/* <S.input
-                  onChangeText={setEndWorkHour}
-                  value={endWorkHour}
-                  keyboardType="numeric"
-                  placeholder="00:00"
-                  maxLength={5}
-                /> */}
               </HStack>
             </HStack>
 
@@ -466,14 +425,18 @@ export function Config() {
                   isSelect={weekWorkHour.findIndex(i => i.id === h.id) !== -1}
                   key={h.id}
                 >
-                  <S.titleSem>{h.week}</S.titleSem>
+                  <S.titleSem
+                    isSelect={weekWorkHour.findIndex(i => i.id === h.id) !== -1}
+                  >
+                    {h.week}
+                  </S.titleSem>
                 </S.box1>
               ))}
             </S.grid>
 
             <ButtonConf
               load={loadWorkHour}
-              onPress={handleSubmit(handleUpdateWorkHour)}
+              onPress={workControll.handleSubmit(handleUpdateWorkHour)}
               title="SALVAR"
             />
           </S.box>
@@ -486,19 +449,25 @@ export function Config() {
             <HStack justifyContent="space-between" my="4">
               <Select
                 selected={folga === 'DIARIA'}
-                pres={() => setFolga('DIARIA')}
+                pres={() => {
+                  setFolga('DIARIA');
+                }}
                 variant="gray"
                 title="diária"
               />
               <Select
                 selected={folga === 'SEMANAL'}
-                pres={() => setFolga('SEMANAL')}
+                pres={() => {
+                  setFolga('SEMANAL');
+                }}
                 variant="gray"
                 title="semanal"
               />
               <Select
                 selected={folga === 'MENSAL'}
-                pres={() => setFolga('MENSAL')}
+                pres={() => {
+                  setFolga('MENSAL');
+                }}
                 variant="gray"
                 title="mensal"
               />
@@ -509,19 +478,43 @@ export function Config() {
                 <HStack mt="4" w="full" justifyContent="space-between">
                   <HStack alignItems="center" space={4}>
                     <S.title>dia</S.title>
-                    <S.input
-                      keyboardType="numeric"
-                      placeholder="01"
-                      onChangeText={setDayVocation}
+                    <InputForm
+                      icon="clock"
+                      name="day"
+                      error={vocationDay.formState.errors.day}
+                      control={vocationDay.control}
+                      render={({ onChange, value }) => (
+                        <S.input
+                          placeholder={`${getDate(new Date())}`}
+                          keyboardType="numeric"
+                          type="text"
+                          value={value}
+                          keyboardType="numeric"
+                          onChangeText={onChange}
+                          maxLenght={2}
+                        />
+                      )}
                     />
                   </HStack>
 
                   <HStack alignItems="center" space={4}>
                     <S.title>mês</S.title>
-                    <S.input
-                      onChangeText={setMonthVocation}
-                      keyboardType="numeric"
-                      placeholder="01"
+                    <InputForm
+                      icon="clock"
+                      name="month"
+                      error={vocationDay.formState.errors.month}
+                      control={vocationDay.control}
+                      render={({ onChange, value }) => (
+                        <S.input
+                          placeholder={`${getMonth(new Date())}`}
+                          keyboardType="numeric"
+                          type="text"
+                          value={value}
+                          keyboardType="numeric"
+                          onChangeText={onChange}
+                          maxLenght={2}
+                        />
+                      )}
                     />
                   </HStack>
                 </HStack>
@@ -529,23 +522,43 @@ export function Config() {
                 <HStack mt="4" w="full" justifyContent="space-between">
                   <HStack alignItems="center" space={4}>
                     <S.title>das</S.title>
-                    <S.input
-                      onChangeText={setStartVocation}
-                      value={startVocation}
-                      keyboardType="numeric"
-                      placeholder="00:00"
-                      maxLength={5}
+                    <InputForm
+                      icon="clock"
+                      name="das"
+                      error={vocationDay.formState.errors.das}
+                      control={vocationDay.control}
+                      render={({ onChange, value }) => (
+                        <S.input
+                          placeholder="00:00"
+                          keyboardType="numeric"
+                          type="text"
+                          value={_hora(value)}
+                          keyboardType="numeric"
+                          onChangeText={onChange}
+                          maxLength={5}
+                        />
+                      )}
                     />
                   </HStack>
 
                   <HStack alignItems="center" space={4}>
                     <S.title>ás</S.title>
-                    <S.input
-                      onChangeText={setEndVocation}
-                      value={endVocation}
-                      keyboardType="numeric"
-                      maxLength={5}
-                      placeholder="00:00"
+                    <InputForm
+                      icon="clock"
+                      name="as"
+                      error={vocationDay.formState.errors.as}
+                      control={vocationDay.control}
+                      render={({ onChange, value }) => (
+                        <S.input
+                          placeholder="00:00"
+                          keyboardType="numeric"
+                          type="text"
+                          value={_hora(value)}
+                          keyboardType="numeric"
+                          onChangeText={onChange}
+                          maxLength={5}
+                        />
+                      )}
                     />
                   </HStack>
                 </HStack>
@@ -561,7 +574,9 @@ export function Config() {
                       isSelect={weekVocation === h.id}
                       key={h.id}
                     >
-                      <S.titleSem>{h.week}</S.titleSem>
+                      <S.titleSem isSelect={weekVocation === h.id}>
+                        {h.week}
+                      </S.titleSem>
                     </S.box1>
                   ))}
                 </S.grid>
@@ -569,24 +584,43 @@ export function Config() {
                 <HStack mt="4" w="full" justifyContent="space-between">
                   <HStack alignItems="center" space={4}>
                     <S.title>das</S.title>
-
-                    <S.input
-                      onChangeText={setStartVocation}
-                      value={startVocation}
-                      keyboardType="numeric"
-                      maxLength={5}
-                      placeholder="00:00"
+                    <InputForm
+                      icon="clock"
+                      name="das"
+                      error={vocationWeek.formState.errors.das}
+                      control={vocationWeek.control}
+                      render={({ onChange, value }) => (
+                        <S.input
+                          placeholder="00:00"
+                          keyboardType="numeric"
+                          type="text"
+                          value={_hora(value)}
+                          keyboardType="numeric"
+                          onChangeText={onChange}
+                          maxLength={5}
+                        />
+                      )}
                     />
                   </HStack>
 
                   <HStack alignItems="center" space={4}>
                     <S.title>ás</S.title>
-                    <S.input
-                      onChangeText={setEndVocation}
-                      value={endVocation}
-                      keyboardType="numeric"
-                      maxLength={5}
-                      placeholder="00:00"
+                    <InputForm
+                      icon="clock"
+                      name="as"
+                      error={vocationWeek.formState.errors.as}
+                      control={vocationWeek.control}
+                      render={({ onChange, value }) => (
+                        <S.input
+                          placeholder="00:00"
+                          keyboardType="numeric"
+                          type="text"
+                          value={_hora(value)}
+                          keyboardType="numeric"
+                          onChangeText={onChange}
+                          maxLength={5}
+                        />
+                      )}
                     />
                   </HStack>
                 </HStack>
@@ -597,47 +631,78 @@ export function Config() {
               <VStack space={4}>
                 <HStack alignItems="center" space={4}>
                   <S.title>Mês</S.title>
-                  <S.input
-                    onChangeText={setMonthVocation}
-                    keyboardType="numeric"
-                    placeholder="01"
+                  <InputForm
+                    icon="clock"
+                    name="month"
+                    error={vocationMonth.formState.errors.das}
+                    control={vocationMonth.control}
+                    render={({ onChange, value }) => (
+                      <S.input
+                        placeholder="00"
+                        type="text"
+                        keyboardType="numeric"
+                        value={value}
+                        onChangeText={onChange}
+                        maxLength={2}
+                      />
+                    )}
                   />
                 </HStack>
 
                 <HStack mt="4" w="full" justifyContent="space-between">
                   <HStack alignItems="center" space={4}>
                     <S.title>das</S.title>
-                    <S.input
-                      onChangeText={setStartVocation}
-                      value={startVocation}
-                      keyboardType="numeric"
-                      placeholder="00:00"
-                      maxLength={5}
+                    <InputForm
+                      icon="clock"
+                      name="das"
+                      error={vocationMonth.formState.errors.das}
+                      control={vocationMonth.control}
+                      render={({ onChange, value }) => (
+                        <S.input
+                          placeholder="00:00"
+                          type="text"
+                          value={_hora(value)}
+                          keyboardType="numeric"
+                          onChangeText={onChange}
+                          maxLength={5}
+                        />
+                      )}
                     />
                   </HStack>
 
                   <HStack alignItems="center" space={4}>
                     <S.title>ás</S.title>
-                    <S.input
-                      onChangeText={setEndVocation}
-                      value={endVocation}
-                      keyboardType="numeric"
-                      maxLength={5}
-                      placeholder="00:00"
+                    <InputForm
+                      icon="clock"
+                      name="as"
+                      error={vocationMonth.formState.errors.as}
+                      control={vocationMonth.control}
+                      render={({ onChange, value }) => (
+                        <S.input
+                          placeholder="00:00"
+                          type="text"
+                          value={_hora(value)}
+                          keyboardType="numeric"
+                          onChangeText={onChange}
+                          maxLength={5}
+                        />
+                      )}
                     />
                   </HStack>
                 </HStack>
               </VStack>
             )}
 
+            {}
+
             <ButtonConf
               load={loadVocation}
-              onPress={handleUpdateVocation}
+              onPress={variable[folga]}
               title="SALVAR"
             />
           </S.box>
 
-          <S.box>
+          {/* <S.box>
             <S.title>Minhas folgas</S.title>
 
             <FlashList
@@ -652,36 +717,79 @@ export function Config() {
             />
 
             <ButtonConf title="SALVAR" />
-          </S.box>
+          </S.box> */}
 
           <S.box>
             <S.title>Adicionar serviço</S.title>
-
-            <S.input
-              style={{ width: '100%', height: 40, margin: 5 }}
-              placeholder="Nome do serviço"
-              onChangeText={setNameService}
+            <InputForm
+              icon="clock"
+              name="name"
+              error={serviceControll.formState.errors.name}
+              control={serviceControll.control}
+              render={({ onChange, value }) => (
+                <S.input
+                  style={{ width: '100%', height: 40, margin: 5 }}
+                  placeholder="Nome do serviço"
+                  type="text"
+                  value={value}
+                  onChangeText={onChange}
+                />
+              )}
             />
 
-            <S.input
-              style={{ width: '100%', height: 40, margin: 5 }}
-              keyboardType="numeric"
-              placeholder="Tempo de execução exemp: 00:30m"
-              onChangeText={setTimeService}
-              value={timeService}
+            <InputForm
+              icon="clock"
+              name="description"
+              error={serviceControll.formState.errors.description}
+              control={serviceControll.control}
+              render={({ onChange, value }) => (
+                <S.input
+                  style={{ width: '100%', height: 40, margin: 5 }}
+                  placeholder="Descrição do serviço"
+                  type="text"
+                  value={value}
+                  onChangeText={onChange}
+                />
+              )}
             />
 
-            <S.input
-              style={{ width: '100%', height: 40, margin: 5 }}
-              keyboardType="numeric"
-              placeholder="Valor R$"
-              onChangeText={setAmoutService}
-              value={amountService}
+            <InputForm
+              icon="clock"
+              name="time"
+              error={serviceControll.formState.errors.time}
+              control={serviceControll.control}
+              render={({ onChange, value }) => (
+                <S.input
+                  style={{ width: '100%', height: 40, margin: 5 }}
+                  keyboardType="numeric"
+                  placeholder="Tempo de execução exp: 00:30"
+                  type="text"
+                  value={_hora(value)}
+                  onChangeText={onChange}
+                />
+              )}
+            />
+
+            <InputForm
+              icon="clock"
+              name="value"
+              error={serviceControll.formState.errors.value}
+              control={serviceControll.control}
+              render={({ onChange, value }) => (
+                <S.input
+                  style={{ width: '100%', height: 40, margin: 5 }}
+                  placeholder="Valor do serviço R$"
+                  keyboardType="numeric"
+                  type="text"
+                  value={_money(value)}
+                  onChangeText={onChange}
+                />
+              )}
             />
 
             <ButtonConf
               load={loadService}
-              onPress={handleCreateService}
+              onPress={serviceControll.handleSubmit(handleCreateService)}
               title="SALVAR"
             />
           </S.box>

@@ -1,7 +1,12 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { FlatList, View } from 'react-native';
 
+import { isPast, isWithinInterval, set } from 'date-fns';
+
+import { IAppointment } from '@/dtos';
 import { useAuth } from '@/hooks/useAuth';
+import { api } from '@/services/api';
+import { useFocusEffect } from '@react-navigation/native';
 
 import { Card } from '../../components/Card';
 import { Menu } from '../../components/Menu';
@@ -19,29 +24,74 @@ const cards = [
 ];
 
 export function Home() {
-  const { logOut } = useAuth();
+  const { logOut, provider, updateUser } = useAuth();
 
-  React.useEffect(() => {
-    // logOut();
-  }, []);
+  const data = React.useMemo(() => {
+    const apoint = provider.appointment
+
+      .filter(h => {
+        const past = isPast(new Date(h.start));
+        const start = set(new Date(), {
+          hours: 0,
+          minutes: provider.workhour.from,
+        });
+        const end = set(new Date(), {
+          hours: 0,
+          minutes: provider.workhour.at,
+        });
+
+        const interval = isWithinInterval(new Date(h.start), {
+          start,
+          end,
+        });
+
+        if (!past && interval) {
+          return h;
+        }
+      })
+      .sort((a, b) => {
+        if (a.start < b.start) {
+          return -1;
+        }
+      });
+
+    const slice = apoint.filter((h, i) => {
+      if (i > 0) {
+        return h;
+      }
+    });
+
+    return { apoint, slice };
+  }, [provider]);
+
+  useFocusEffect(
+    useCallback(() => {
+      updateUser();
+    }, []),
+  );
   return (
-    <>
-      <Menu title="Home" variant="rose" />
-      <S.Container>
-        <S.title>Confira seus horários para hoje</S.title>
+    <S.Container>
+      <Menu variant="gray" />
 
-        <Card next />
+      {data.apoint.length === 0 ? (
+        <S.title>Não há horários para hoje</S.title>
+      ) : (
+        <>
+          <S.title>Confira seus horários para hoje</S.title>
 
-        <FlatList
-          style={{ top: -35 }}
-          contentContainerStyle={{
-            paddingTop: 50,
-          }}
-          data={cards}
-          keyExtractor={h => h.id}
-          renderItem={({ item: h }) => <Card />}
-        />
-      </S.Container>
-    </>
+          <Card next item={data.apoint[0]} />
+        </>
+      )}
+
+      <FlatList
+        style={{ top: -35 }}
+        contentContainerStyle={{
+          paddingTop: 50,
+        }}
+        data={data.slice}
+        keyExtractor={h => h.id}
+        renderItem={({ item: h }) => <Card next={false} item={h} />}
+      />
+    </S.Container>
   );
 }

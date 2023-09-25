@@ -1,9 +1,10 @@
-import styled from 'styled-components/native';
-
 import { Dimensions } from 'react-native';
 
+import styled from 'styled-components/native';
+
 import { cor } from '@/styles/cor';
-import { _text, _title } from '@/styles/sizes';
+import { font } from '@/styles/fonts';
+import { _subTitle, _text, _title } from '@/styles/sizes';
 
 const h = Dimensions.get('screen').height;
 
@@ -27,7 +28,7 @@ export const Container = styled.View<IProps>`
 
 export const shadow = styled.View`
   position: relative;
-  background-color: rgba(14, 14, 14, 0.568);
+  background-color: ${cor.light.black_b};
   height: ${h * 0.16}px;
   width: 95%;
   z-index: 0;
@@ -40,16 +41,18 @@ export const shadow = styled.View`
 export const boxHour = styled.View`
   /* flex: 1; */
   position: relative;
-  background-color: red;
   border-radius: 80px;
   top: -${h * 0.045}px;
 `;
 
 export const header = styled.View`
-  width: 100%;
-  align-items: center;
+  width: 85%;
+  position: fixed;
+  top: 28px;
+  align-items: flex-end;
   justify-content: center;
   margin-bottom: 20px;
+  align-self: flex-end;
 `;
 
 export const content = styled.View`
@@ -57,22 +60,23 @@ export const content = styled.View`
 `;
 
 export const title = styled.Text`
-  font-size: ${_title + 5}px;
-  /* font-family: 'Bold'; */
-  text-align: center;
+  font-size: ${_subTitle}px;
+  font-family: 'Bold';
+  text-align: right;
+  line-height: 20px;
+  /* margin-left: 50px; */
 `;
 export const text = styled.Text`
   font-family: 'Regular';
-  font-weight: 600;
   font-size: ${_text + 5}px;
-  color: ${cor.light['glow-c']};
+  color: ${cor.light['glow-a']};
 `;
 
 export const textHour = styled.Text`
   position: absolute;
-  font-family: 'Regular';
+  font-family: ${font.bold};
   font-weight: 600;
-  font-size: ${_text + 5}px;
+  font-size: ${_subTitle + 5}px;
   color: ${cor.light['glow-c']};
   z-index: 999;
   top: 6%;

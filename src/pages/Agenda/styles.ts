@@ -11,5 +11,5 @@ export const Container = styled.View`
 export const title = styled.Text`
   color: ${cor.light['glow-c']};
   font-size: ${_title + 2}px;
-  /* font-family: 'Bold'; */
+  font-family: 'Bold';
 `;

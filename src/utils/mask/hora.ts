@@ -20,14 +20,17 @@ export function _stringToNumber(text: string) {
 }
 
 export function _money(e: string) {
-  let value = e;
+  let value = null;
 
-  value = value.replace(/\D/g, '');
+  if (e) {
+    value = e.replace(/\D/g, '');
 
-  value = value.replace(/(\d)(\d{2})$/, '$1,$2');
+    value = value.replace(/(\d)(\d{2})$/, '$1,$2');
 
-  value = value.replace(/(?=(\d{3})+(\D))\B/g, '.');
+    value = value.replace(/(?=(\d{3})+(\D))\B/g, '.');
 
-  const vl = `R$ ${value}`;
-  return vl;
+    value = `R$ ${value}`;
+  }
+
+  return value;
 }

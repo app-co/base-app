@@ -9,7 +9,7 @@ interface IProps {
   variant: TVariant;
 }
 
-const variant = {
+const variant: any = {
   gray: cor.light.gray,
   rose: cor.light['glow-a'],
 };
@@ -17,7 +17,7 @@ const variant = {
 export const Container = styled.View<IProps>`
   flex-direction: row;
   align-items: center;
-  padding: 0 25px 10px 25px;
+  /* padding: 0 25px 10px 0px; */
 
   background-color: ${h => variant[h.variant]};
 `;
@@ -25,5 +25,6 @@ export const Container = styled.View<IProps>`
 export const title = styled.Text`
   font-size: ${_title + 5}px;
   margin-left: 20px;
-  /* font-family: 'Regular'; */
+  font-family: 'Regular';
+  color: ${cor.light['glow-c']};
 `;

@@ -1,6 +1,6 @@
 export const cor = {
   blue: {
-    1: '#b2d3ff',
+    1: 'rgba(27, 33, 47, 1)',
     2: '#517097',
     3: '#264063',
     4: '#051830',
@@ -13,8 +13,8 @@ export const cor = {
     4: '#2c2c2c',
   },
 
-  sucess: {
-    1: '#4cff28',
+  gold: {
+    1: 'rgba(245, 201, 119, 1)',
     2: '#2dac14',
     3: '#1d660e',
     4: '#0d2c06',
@@ -33,5 +33,6 @@ export const cor = {
     'glow-b': 'rgba(166, 136, 109, 1)',
     'glow-c': 'rgba(242, 205, 172, 1)',
     black: 'rgba(12, 12, 12, 1)',
+    black_b: 'rgba(44,44,44, 1)',
   },
 };

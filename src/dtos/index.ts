@@ -28,18 +28,21 @@ export interface IWorkHour {
   from: number;
   id: string;
   updated_at: Date | string;
-  week: string;
+  week: number[];
 }
 
 export interface IAppointment {
   created_at: Date | string;
+  client_name: string;
   end: Date | string;
   fk_client_id: string;
   fk_provider_id: string;
   id: string;
   service: string;
   start: Date | string;
+  formated: string;
   updated_at: Date | string;
+  status: 'pendente' | 'realizado' | 'não realizado';
 }
 
 export interface IProvider {
@@ -63,4 +66,15 @@ export interface IProvider {
   Service: IServiceProvider[];
   Vocation: IVocation[];
   appointment: IAppointment[];
+  workhour: IWorkHour;
+}
+
+export interface IClient {
+  avatar: string;
+  cell: string;
+  created_at: string;
+  email: string;
+  id: string;
+  name: string;
+  updated_at: string;
 }

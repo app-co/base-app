@@ -1,50 +1,43 @@
 import React from 'react';
 import { ActivityIndicator, Dimensions, View } from 'react-native';
 
-import { Mitr_400Regular as Regular } from '@expo-google-fonts/mitr';
-
 import { useFonts } from 'expo-font';
 
-import { Canvas, Oval, useFont } from '@shopify/react-native-skia';
+import { Mitr_400Regular as Regular } from '@expo-google-fonts/mitr';
 
+import { format } from 'date-fns';
+
+import { IAppointment } from '@/dtos';
 import { cor } from '@/styles/cor';
 import { _title } from '@/styles/sizes';
+import { Canvas, Oval, useFont } from '@shopify/react-native-skia';
 
 import * as S from './styles';
 
 const h = Dimensions.get('screen').height;
 
 interface IProps {
-  work: string;
-  date: string;
-  name: string;
+  item: IAppointment;
   next: boolean;
 }
 
-export function Card({ work, next = false, date = '00:00', name }: IProps) {
-  const [fontsLoaded] = useFonts({
-    Regular,
-  });
+export function Card({ item, next = false }: IProps) {
+  const date = item?.start ? format(new Date(item.start), 'HH:mm') : '00:00';
 
-  if (!fontsLoaded) {
-    return (
-      <View>
-        <ActivityIndicator />
-      </View>
-    );
-  }
+  console.log(item);
+
   return (
     <View>
       <S.shadow />
       <S.Container next={next}>
         <S.header>
-          <S.title>{work}</S.title>
+          <S.title>{item?.service}</S.title>
         </S.header>
 
         <S.content>
           <S.flex>
             <S.text>Cliente: </S.text>
-            <S.text>{name}</S.text>
+            <S.text>{item?.client_name}</S.text>
           </S.flex>
         </S.content>
       </S.Container>
@@ -55,17 +48,10 @@ export function Card({ work, next = false, date = '00:00', name }: IProps) {
           width: 130,
           height: 66,
           position: 'relative',
-          top: -(h * 0.16),
+          top: -(h * 0.165),
         }}
       >
-        <Oval x={0} y={0} width={130} height={66} color={cor.light.gray} />
-        {/* <Text
-          font={font!}
-          text={date}
-          y={40}
-          x={24}
-          color={cor.light['glow-c']}
-        /> */}
+        <Oval x={0} y={0} width={130} height={66} color={cor.light.black_b} />
       </Canvas>
     </View>
   );
